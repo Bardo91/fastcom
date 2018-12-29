@@ -27,7 +27,7 @@
 namespace fastcom {
     template<typename DataType_>
     Publisher<DataType_>::Publisher(int _name){
-        int mPort = _name;
+        mPort = _name;
         mRun = true;
         std::cout << "Creating UDP server in port " << mPort << "... ";
         mListenThread = std::thread([&]() {
