@@ -25,8 +25,6 @@
 #include <iostream>
 #include <chrono>
 
-#include "MultiClientServer.h"
-
 struct SimpleFloat{
     float a;
 };
@@ -34,14 +32,12 @@ struct SimpleFloat{
 int main(){
 
     fastcom::Publisher<SimpleFloat> publisher(8888);
-    // mcs::MultiClientServer<mcs::eSocketType::UDP> server(8888);
 
     SimpleFloat data;
     data.a = 0;
     for(;;){
         std::this_thread::sleep_for(std::chrono::milliseconds(100));   
         publisher.publish(data);
-        // server.writeOnClients<SimpleFloat>(data);
         data.a +=1;
     }
 
