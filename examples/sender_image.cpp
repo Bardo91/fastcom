@@ -33,18 +33,13 @@ int main(int _argc, char** _argv){
 
     fastcom::ImagePublisher publisher(8888);
 
-    cv::Mat image1 = cv::imread(_argv[1]);
-    cv::Mat image2 = cv::imread(_argv[2]);
-    bool imageUsed = false;
+
+    cv::VideoCapture camera(0);
 
     for(;;){
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));   
-        if(imageUsed)
-            publisher.publish(image1);
-        else
-            publisher.publish(image2);
-    
-        imageUsed = !imageUsed;
+        cv::Mat image;
+        camera >> image;
+        publisher.publish(image);
     }
 
 }
