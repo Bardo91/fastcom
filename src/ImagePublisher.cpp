@@ -36,6 +36,7 @@ namespace fastcom{
         std::vector<uchar> buffer;
 
         cv::imencode(".jpg", _image, buffer, params);
+        auto bufferPtr = buffer.begin();
 
         std::chrono::time_point<std::chrono::system_clock> timeStamp = std::chrono::system_clock::now();
 
@@ -51,10 +52,12 @@ namespace fastcom{
             int endSize = (i == numPackets-1)? buffer.size() % ImageDataPacket::PACKET_SIZE : ImageDataPacket::PACKET_SIZE;
             packet.packetSize = endSize;
 
-            std::copy(  buffer.begin()+i*ImageDataPacket::PACKET_SIZE, 
-                        buffer.begin()+(i+1)*endSize, 
+            std::copy(  bufferPtr, 
+                        bufferPtr + endSize, 
                         packet.buffer);
-                        
+
+            bufferPtr += endSize;
+
             mPublisher->publish(packet);
         }
     }
