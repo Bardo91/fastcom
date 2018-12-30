@@ -42,7 +42,7 @@ namespace fastcom{
 
     class ImagePublisher {
         public:
-            ImagePublisher(int _name);
+            ImagePublisher(int _port);
 
             void publish(cv::Mat &_image, int _compression = 50);
         private:

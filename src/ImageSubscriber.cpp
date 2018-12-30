@@ -24,14 +24,16 @@
 #ifdef FASTCOM_HAS_OPENCV
 
 namespace fastcom{
-    ImageSubscriber::ImageSubscriber(int _name){
-        mSubscriber = new Subscriber<ImageDataPacket>(_name);
+    ImageSubscriber::ImageSubscriber(std::string _ip, int _port){
+        mSubscriber = new Subscriber<ImageDataPacket>(_ip, _port);
         mSubscriber->appendCallback(
             [&](ImageDataPacket &_data){
                 this->coreCallback(_data);
             }
         );
     }
+
+    ImageSubscriber::ImageSubscriber(int _port): ImageSubscriber("0.0.0.0", _port){  }
 
     void ImageSubscriber::appendCallback(std::function<void(cv::Mat &)> &_callback){
         mCallbackGuard.lock();

@@ -31,7 +31,7 @@ namespace fastcom{
     template<typename DataType_>
     class Publisher{
         public:
-            Publisher(int _name);
+            Publisher(int _port);
 
             void publish(DataType_ &_data);
         private:

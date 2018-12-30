@@ -31,7 +31,8 @@
 namespace fastcom{
     class ImageSubscriber {
         public:
-            ImageSubscriber(int _name);
+            ImageSubscriber(std::string _ip, int _port);
+            ImageSubscriber(int _port);
 
             void appendCallback(std::function<void(cv::Mat &)> &_callback);
             

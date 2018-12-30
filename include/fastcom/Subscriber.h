@@ -30,7 +30,8 @@ namespace fastcom{
     template<typename DataType_>
     class Subscriber{
         public:
-            Subscriber(int _name);
+            Subscriber(std::string _ip, int _port);
+            Subscriber(int _port);
 
             void appendCallback(std::function<void(DataType_ &)> _callback);
 

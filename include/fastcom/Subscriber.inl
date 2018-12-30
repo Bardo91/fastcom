@@ -27,12 +27,12 @@
 namespace fastcom{
     //---------------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
-    Subscriber<DataType_>::Subscriber(int _name){
-        mEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), _name);
+    Subscriber<DataType_>::Subscriber(std::string _ip, int _port){
+        mEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_ip), _port);
         mSocket = new boost::asio::ip::udp::socket(io_service);
         mSocket->open(boost::asio::ip::udp::v4());
 
-        std::cout << "Trying to connect to " << _name << std::endl;
+        std::cout << "Trying to connect to " << _port << std::endl;
 
         // Send query to publisher
         boost::array<char, 1> send_buf = { { 0 } };
@@ -56,6 +56,10 @@ namespace fastcom{
             }
         });
     }
+
+    //---------------------------------------------------------------------------------------------------------------------
+    template<typename DataType_>
+    Subscriber<DataType_>::Subscriber(int _port): Subscriber("0.0.0.0", _port) {  }
 
     //---------------------------------------------------------------------------------------------------------------------
     template<typename DataType_>

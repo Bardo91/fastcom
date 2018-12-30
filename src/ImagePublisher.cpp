@@ -25,8 +25,8 @@
 #ifdef FASTCOM_HAS_OPENCV
 
 namespace fastcom{
-    ImagePublisher::ImagePublisher(int _name) {
-        mPublisher = new Publisher<ImageDataPacket>(_name);
+    ImagePublisher::ImagePublisher(int _port) {
+        mPublisher = new Publisher<ImageDataPacket>(_port);
     }
 
     void ImagePublisher::publish(cv::Mat &_image, int _compression){
