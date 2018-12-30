@@ -24,6 +24,7 @@
 
 #include <fastcom/Publisher.h>
 #include <opencv2/opencv.hpp>
+#include <chrono>
 
 #ifdef FASTCOM_HAS_OPENCV
 
@@ -31,6 +32,7 @@ namespace fastcom{
     struct ImageDataPacket{   
         static const int PACKET_SIZE = 1024;
         bool isFirst = false;
+        std::chrono::time_point<std::chrono::system_clock> timeStamp;
         int packetId = 0;
         int numPackets = 0;
         int totalSize = 0;

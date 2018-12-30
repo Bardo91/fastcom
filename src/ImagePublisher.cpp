@@ -37,9 +37,12 @@ namespace fastcom{
 
         cv::imencode(".jpg", _image, buffer, params);
 
+        std::chrono::time_point<std::chrono::system_clock> timeStamp = std::chrono::system_clock::now();
+
         int numPackets = buffer.size()/ImageDataPacket::PACKET_SIZE + 1;
         for(unsigned i = 0; i < numPackets ; i++){
             ImageDataPacket packet;
+            packet.timeStamp = timeStamp;
             packet.packetId = i;
             packet.isFirst = i == 0;
             packet.numPackets = numPackets;

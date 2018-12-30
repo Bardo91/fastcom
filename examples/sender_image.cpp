@@ -33,13 +33,12 @@ int main(int _argc, char** _argv){
 
     fastcom::ImagePublisher publisher(8888);
 
-
     cv::VideoCapture camera(0);
 
     for(;;){
         cv::Mat image;
         camera >> image;
-        publisher.publish(image);
+        publisher.publish(image, 30);
     }
 
 }
