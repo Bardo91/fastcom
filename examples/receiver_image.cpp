@@ -34,7 +34,7 @@ int main(){
         cv::waitKey(3);
     };
 
-    subscriber.appendCallback(callback);
+    subscriber.attachCallback(callback);
 
     for(;;){
         std::this_thread::sleep_for(std::chrono::milliseconds(100));   

@@ -29,6 +29,7 @@
 #ifdef FASTCOM_HAS_OPENCV
 
 namespace fastcom{
+    /// Data packet used by ImagePublisher to split images into packets.
     struct ImageDataPacket{   
         static const int PACKET_SIZE = 1024;
         bool isFirst = false;
@@ -40,10 +41,16 @@ namespace fastcom{
         char buffer[PACKET_SIZE];
     };
 
+    /// Specialized Publisher to publish images to subscribers
     class ImagePublisher {
         public:
+            /// Basic constructor. It binds to an specific port and sends information to subscriber.
+            /// \param _port: ports to be binded.
             ImagePublisher(int _port);
 
+            /// Publish an image to the subscribers.
+            /// \param _image: image to be published.
+            /// \param _compression: JPG compression rate.
             void publish(cv::Mat &_image, int _compression = 50);
         private:
             Publisher<ImageDataPacket> *mPublisher;

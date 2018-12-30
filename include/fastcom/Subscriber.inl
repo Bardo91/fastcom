@@ -63,16 +63,10 @@ namespace fastcom{
 
     //---------------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
-    void Subscriber<DataType_>::appendCallback(std::function<void(DataType_ &)> _callback){
+    void Subscriber<DataType_>::attachCallback(std::function<void(DataType_ &)> _callback){
         mCallbackGuard.lock();
         mCallbacks.push_back(_callback);
         mCallbackGuard.unlock();
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-    bool Subscriber<DataType_>::isConnected(){
-
     }
 
 }

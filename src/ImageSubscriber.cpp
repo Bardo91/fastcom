@@ -26,7 +26,7 @@
 namespace fastcom{
     ImageSubscriber::ImageSubscriber(std::string _ip, int _port){
         mSubscriber = new Subscriber<ImageDataPacket>(_ip, _port);
-        mSubscriber->appendCallback(
+        mSubscriber->attachCallback(
             [&](ImageDataPacket &_data){
                 this->coreCallback(_data);
             }
@@ -35,7 +35,7 @@ namespace fastcom{
 
     ImageSubscriber::ImageSubscriber(int _port): ImageSubscriber("0.0.0.0", _port){  }
 
-    void ImageSubscriber::appendCallback(std::function<void(cv::Mat &)> &_callback){
+    void ImageSubscriber::attachCallback(std::function<void(cv::Mat &)> &_callback){
         mCallbackGuard.lock();
         mCallbacks.push_back(_callback);
         mCallbackGuard.unlock();

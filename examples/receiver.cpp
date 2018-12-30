@@ -34,7 +34,7 @@ int main(){
 
     fastcom::Subscriber<SimpleFloat> subscriber(8888);
 
-    subscriber.appendCallback([&](SimpleFloat &_data){
+    subscriber.attachCallback([&](SimpleFloat &_data){
         std::cout << _data.a << std::endl;
     });
 

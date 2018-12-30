@@ -33,7 +33,22 @@ if(OpenCV_FOUND)
 endif(OpenCV_FOUND)
 
 
-# EXAMPLES
+#########################################
+######			Documentation	   ######
+#########################################
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+	add_custom_target(	doc_fastcom
+						${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+						WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+						COMMENT "Generating API documentation with Doxygen" VERBATIM )
+endif(DOXYGEN_FOUND)
+
+
+#########################################
+######			Examples	   ######
+#########################################
 
 add_executable(example_sender "examples/sender.cpp")
 target_include_directories(example_sender PRIVATE "./include")

@@ -28,11 +28,16 @@
 
 
 namespace fastcom{
+    /// Class that broadcast information.
     template<typename DataType_>
     class Publisher{
         public:
+            /// Basic constructor. It binds to an specific port and sends information to subscriber
+            /// \param _port: ports to be binded.
             Publisher(int _port);
 
+            /// Publish information to the subscribers
+            /// \param _data: data to be published.
             void publish(DataType_ &_data);
         private:
             int mPort;

@@ -29,12 +29,20 @@
 #ifdef FASTCOM_HAS_OPENCV
 
 namespace fastcom{
+    /// Subscriber specialized for image transmission
     class ImageSubscriber {
         public:
+            /// Constructor to subscribe to ImagePublishers in different computers.
+            /// \param _ip: IP where the ImagePublisher is located
+            /// \param _port: Specific port in the IP to bind
             ImageSubscriber(std::string _ip, int _port);
+
+            /// Constructor to subscribe to ImagePublishers. It assumes that the publisher is in the same computer
+            /// \param _port: Specific port in the IP to bind
             ImageSubscriber(int _port);
 
-            void appendCallback(std::function<void(cv::Mat &)> &_callback);
+            /// Attach a callback to a subscription. Each time an image arrives the attached callback are called
+            void attachCallback(std::function<void(cv::Mat &)> &_callback);
             
         private:
             void coreCallback(ImageDataPacket &_data);

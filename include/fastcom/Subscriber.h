@@ -27,15 +27,22 @@
 #include <mutex>
 
 namespace fastcom{
+    /// Class to subscribe to information. 
     template<typename DataType_>
     class Subscriber{
         public:
+            /// Constructor that prepares the subsciption. 
+            /// \param _ip: ip where the publisher is located
+            /// \param _port: specific port in the IP to be binded
             Subscriber(std::string _ip, int _port);
+
+            /// Constructor that prepares the subsciption. This constructor assumes that the publisher is in the same computer.
+            /// \param _port: specific port in the IP to be binded
             Subscriber(int _port);
 
-            void appendCallback(std::function<void(DataType_ &)> _callback);
+            /// Attach a callback to a subscription. Each time data arrives the attached callback are called
+            void attachCallback(std::function<void(DataType_ &)> _callback);
 
-            bool isConnected();
         private:
             boost::asio::ip::udp::endpoint mEndpoint;
             boost::asio::ip::udp::socket *mSocket;
