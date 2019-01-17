@@ -27,6 +27,8 @@
 
 struct SimpleFloat{
     float a;
+    float b;
+    float c;
 };
 
 int main(){
