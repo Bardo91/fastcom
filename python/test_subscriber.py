@@ -19,51 +19,26 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-import socket
-import sys
-import threading
+import Subscriber
+import time
+import struct
 
-""" Publisher class.
-This class communicates data to subscribers
-"""
-class Publisher:
-    """ Basic initializer
-    """
-    def __init__(self, _port):
-        # Some init variables
-        self.run = True
-        self.guard_list = threading.Lock()
-        self.client_list = []
+# Create subscriber
+subs = Subscriber.Subscriber("0.0.0.0",8888)
 
-        # Create socket
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = ('0.0.0.0', _port)
-        self.sock.bind(server_address)
+# Create nested callback with lambdas
+decodeCallback = lambda data:  struct.unpack("fff", data)
+printCallback = lambda data: print("%f, %f, %f"%(decodeCallback(data)[0], decodeCallback(data)[1], decodeCallback(data)[2]))
 
-        # Start listening for connections
-        self.listen_thread = threading.Thread(target=self.__callbackListen)
-        self.listen_thread.start()
+# Created function for callback
+def sumCallback(data):
+    pack = struct.unpack("fff", data)
+    print("Sum: %f"%(pack[0]+pack[1]+pack[2]))
 
-    """ Basic destructor
-    """
-    def __del__(self):
-        self.run = False
+# Append callbacks
+subs.appendCallback(printCallback)
+subs.appendCallback(sumCallback)
 
-    """ Publish data to publisher. 
-        Data is an array of bytes to be sent.
-    """
-    def publish(self, data):
-        self.guard_list.acquire()
-        for add in self.client_list:
-            sent = self.sock.sendto(data, add)
-        self.guard_list.release()
-
-    def __callbackListen(self):
-        while self.run:
-            print("Waiting for connection")
-            data, address = self.sock.recvfrom(1)
-            print("Received new connection from: ", address)
-            self.guard_list.acquire()
-            self.client_list.append(address)
-            self.guard_list.release()
-
+# Just sleep
+while True:
+    time.sleep(1.0)

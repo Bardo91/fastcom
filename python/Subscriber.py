@@ -18,3 +18,51 @@
 ##  OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
+
+import socket
+import sys
+import threading
+
+""" Subscriber class.
+This class that receives data from publishers
+"""
+class Subscriber:
+    """ Basic initializer
+    """
+    def __init__(self, _host, _port):
+        # Some init variables
+        self.run = True
+        self.guard_list = threading.Lock()
+        self.callbacks_list = []
+
+        # Create socket
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.server_address = (_host, _port)
+        
+        # Send one byte to notify publisher
+        self.sock.sendto(b'1', self.server_address)
+
+        # Start listening for publisher to call callbacks
+        self.listen_thread = threading.Thread(target=self.__callbackListen)
+        self.listen_thread.start()
+
+    """ Basic destructor
+    """
+    def __del__(self):
+        self.run = False
+
+    """ Publish data to publisher. 
+        Data is an array of bytes to be sent.
+    """
+    def appendCallback(self, callback):
+        self.guard_list.acquire()
+        self.callbacks_list.append(callback)
+        self.guard_list.release()
+
+    def __callbackListen(self):
+        while True:
+            data, address = self.sock.recvfrom(4096)
+            self.guard_list.acquire()
+            for call in self.callbacks_list:
+                call(data)
+            self.guard_list.release()
