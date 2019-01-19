@@ -29,10 +29,10 @@ for idx, dir in enumerate(sys.path):
 
 
 
-import ImagePublisher
+import fastcom.ImagePublisher
 import cv2
 
-pub = ImagePublisher.ImagePublisher(8888)
+pub = fastcom.ImagePublisher.ImagePublisher(8888)
 
 camera = cv2.VideoCapture(0)
 while True:

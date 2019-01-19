@@ -19,11 +19,11 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-import Publisher
+import fastcom.Publisher
 import time
 import struct
 
-pub = Publisher.Publisher(8888)
+pub = fastcom.Publisher.Publisher(8888)
 
 
 x_img = 333.2

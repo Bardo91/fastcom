@@ -22,7 +22,7 @@
 import socket
 import sys
 import threading
-import ImagePublisher
+import fastcom.ImagePublisher
 import struct
 import numpy as np
 
@@ -71,10 +71,10 @@ class ImageSubscriber:
             dataBuffer = []
             while True:
                 # Get and decode data
-                expectedRecvSize = struct.calcsize("i?iiii"+str(ImagePublisher.ImageDataPacket().PACKET_SIZE)+"B")
+                expectedRecvSize = struct.calcsize("i?iiii"+str(fastcom.ImagePublisher.ImageDataPacket().PACKET_SIZE)+"B")
                 data, address = self.sock.recvfrom(expectedRecvSize)
-                recvData = struct.unpack("i?iiii"+str(ImagePublisher.ImageDataPacket().PACKET_SIZE)+"B", data)
-                recvPacket = ImagePublisher.ImageDataPacket()
+                recvData = struct.unpack("i?iiii"+str(fastcom.ImagePublisher.ImageDataPacket().PACKET_SIZE)+"B", data)
+                recvPacket = fastcom.ImagePublisher.ImageDataPacket()
                 recvPacket.PACKET_SIZE = recvData[0]
                 recvPacket.isFirst = recvData[1]
                 recvPacket.packetId = recvData[2]

@@ -29,10 +29,10 @@ for idx, dir in enumerate(sys.path):
 
 
 
-import ImageSubscriber
+import fastcom.ImageSubscriber
 import cv2
 
-pub = ImageSubscriber.ImageSubscriber("0.0.0.0", 8888)
+pub = fastcom.ImageSubscriber.ImageSubscriber("0.0.0.0", 8888)
 
 def showImage(_image):
     cv2.imshow("image", _image)

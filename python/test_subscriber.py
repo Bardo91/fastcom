@@ -19,12 +19,12 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-import Subscriber
+import fastcom.Subscriber
 import time
 import struct
 
 # Create subscriber
-subs = Subscriber.Subscriber("0.0.0.0",8888)
+subs = fastcom.Subscriber.Subscriber("0.0.0.0",8888)
 
 # Create nested callback with lambdas
 decodeCallback = lambda data:  struct.unpack("fff", data)
