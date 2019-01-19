@@ -38,18 +38,18 @@ namespace fastcom{
         cv::imencode(".jpg", _image, buffer, params);
         auto bufferPtr = buffer.begin();
 
-        std::chrono::time_point<std::chrono::system_clock> timeStamp = std::chrono::system_clock::now();
+        //std::chrono::time_point<std::chrono::system_clock> timeStamp = std::chrono::system_clock::now();
 
-        int numPackets = buffer.size()/ImageDataPacket::PACKET_SIZE + 1;
+        int numPackets = buffer.size()/IMAGE_PACKET_SIZE + 1;
         for(unsigned i = 0; i < numPackets ; i++){
             ImageDataPacket packet;
-            packet.timeStamp = timeStamp;
+            //packet.timeStamp = timeStamp;
             packet.packetId = i;
             packet.isFirst = i == 0;
             packet.numPackets = numPackets;
             packet.totalSize = buffer.size();
 
-            int endSize = (i == numPackets-1)? buffer.size() % ImageDataPacket::PACKET_SIZE : ImageDataPacket::PACKET_SIZE;
+            int endSize = (i == numPackets-1)? buffer.size() % IMAGE_PACKET_SIZE : IMAGE_PACKET_SIZE;
             packet.packetSize = endSize;
 
             std::copy(  bufferPtr, 

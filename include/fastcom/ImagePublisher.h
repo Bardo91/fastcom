@@ -30,15 +30,15 @@
 
 namespace fastcom{
     /// Data packet used by ImagePublisher to split images into packets.
+    static const int IMAGE_PACKET_SIZE = 1024;
     struct ImageDataPacket{   
-        static const int PACKET_SIZE = 1024;
+        int PACKET_SIZE = IMAGE_PACKET_SIZE;
         bool isFirst = false;
-        std::chrono::time_point<std::chrono::system_clock> timeStamp;
         int packetId = 0;
         int numPackets = 0;
         int totalSize = 0;
         int packetSize = 0;
-        char buffer[PACKET_SIZE];
+        char buffer[IMAGE_PACKET_SIZE];
     };
 
     /// Specialized Publisher to publish images to subscribers
