@@ -2,3 +2,7 @@
 build/
 
 \.vscode/
+
+python/__pycache__/
+
+*.pyc
