@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">fastcom
-   &#160;<span id="projectnumber">0.1</span>
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    <div id="projectbrief">Communication between applications made easy</div>
   </td>
@@ -89,7 +89,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="structfastcom_1_1_image_data_packet-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">fastcom::ImageDataPacket Struct Reference</div>  </div>
@@ -103,12 +102,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:a4d0b9c29f3a65cae22f4ca9b3a3b35e2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4d0b9c29f3a65cae22f4ca9b3a3b35e2"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>PACKET_SIZE</b> = IMAGE_PACKET_SIZE</td></tr>
+<tr class="separator:a4d0b9c29f3a65cae22f4ca9b3a3b35e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adac9a0744dcef7944b3b7cf7dd7d85f4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adac9a0744dcef7944b3b7cf7dd7d85f4"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isFirst</b> = false</td></tr>
 <tr class="separator:adac9a0744dcef7944b3b7cf7dd7d85f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9974a4f660f1b4c405a9692ebd43a612"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9974a4f660f1b4c405a9692ebd43a612"></a>
-std::chrono::time_point&lt; std::chrono::system_clock &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>timeStamp</b></td></tr>
-<tr class="separator:a9974a4f660f1b4c405a9692ebd43a612"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a839a13eea4169583261c9f4409ac009a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a839a13eea4169583261c9f4409ac009a"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>packetId</b> = 0</td></tr>
 <tr class="separator:a839a13eea4169583261c9f4409ac009a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -121,15 +120,9 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>totalSize</b> = 0</td>
 <tr class="memitem:a12727a04103bc7b6eee10439a87392ef"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a12727a04103bc7b6eee10439a87392ef"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>packetSize</b> = 0</td></tr>
 <tr class="separator:a12727a04103bc7b6eee10439a87392ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a634cc5cd9318c0f24c978f376e8268d5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a634cc5cd9318c0f24c978f376e8268d5"></a>
-char&#160;</td><td class="memItemRight" valign="bottom"><b>buffer</b> [PACKET_SIZE]</td></tr>
-<tr class="separator:a634cc5cd9318c0f24c978f376e8268d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
-Static Public Attributes</h2></td></tr>
-<tr class="memitem:ad6378b47fa94c094f446d9121e8b2c02"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad6378b47fa94c094f446d9121e8b2c02"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>PACKET_SIZE</b> = 1024</td></tr>
-<tr class="separator:ad6378b47fa94c094f446d9121e8b2c02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5859cf9b1a932bfb00c56f1f0e02d8dc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5859cf9b1a932bfb00c56f1f0e02d8dc"></a>
+char&#160;</td><td class="memItemRight" valign="bottom"><b>buffer</b> [IMAGE_PACKET_SIZE]</td></tr>
+<tr class="separator:a5859cf9b1a932bfb00c56f1f0e02d8dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Data packet used by <a class="el" href="classfastcom_1_1_image_publisher.html" title="Specialized Publisher to publish images to subscribers. ">ImagePublisher</a> to split images into packets. </p>
