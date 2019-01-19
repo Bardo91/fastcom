@@ -67,3 +67,63 @@ add_executable(example_receiver_image "examples/receiver_image.cpp")
 target_include_directories(example_receiver_image PRIVATE "./include")
 target_link_libraries(example_receiver_image LINK_PUBLIC fastcom)
 
+
+#########################################
+######			INSTALL 		   ######
+#########################################
+include(CMakePackageConfigHelpers)
+
+## INSTALLATION Python Library
+add_custom_target(  install_python 
+                    python3 ${CMAKE_CURRENT_SOURCE_DIR}/python/setup.py  install --user
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python )
+
+## INSTALLATION C++ Library
+if(NOT DEFINED CMAKE_INSTALL_PREFIX)
+  set(CMAKE_INSTALL_PREFIX "/usr/local")
+endif() 
+
+install(TARGETS fastcom
+        EXPORT fastcomTargets
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}
+        )
+
+write_basic_package_version_file(
+  fastcomConfigVersion.cmake
+    VERSION ${PACKAGE_VERSION}
+    COMPATIBILITY AnyNewerVersion
+    )
+
+
+# This installs the include folder
+install(DIRECTORY include DESTINATION ${CMAKE_INSTALL_PREFIX} FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY include DESTINATION ${CMAKE_INSTALL_PREFIX} FILES_MATCHING PATTERN "*.inl")
+
+export(TARGETS fastcom NAMESPACE fastcom:: FILE fastcom.cmake)
+
+# This generates fastcomTargets.cmake
+install(EXPORT fastcomTargets
+    FILE fastcomTargets.cmake
+    NAMESPACE fastcom::
+    DESTINATION lib/cmake/fastcom
+    )
+
+configure_file(fastcomConfig.cmake.in fastcomConfig.cmake @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/fastcomConfig.cmake"
+        DESTINATION lib/cmake/fastcom
+        )
+
+# uninstall target 
+if(NOT TARGET uninstall) 
+  configure_file( 
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in" 
+      "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" 
+      IMMEDIATE @ONLY) 
+ 
+  add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake) 
+endif() 
+
+
+ 
