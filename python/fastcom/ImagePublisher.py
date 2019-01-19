@@ -64,7 +64,7 @@ class ImagePublisher:
         self.run = False
 
     """ Send images to subscribers data to publisher. 
-        Images should be in cv format.
+        Images should be in cv2 format.
     """
     def publish(self, _image, _compression=50):
         # Encode image

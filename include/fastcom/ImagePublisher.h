@@ -29,8 +29,10 @@
 #ifdef FASTCOM_HAS_OPENCV
 
 namespace fastcom{
-    /// Data packet used by ImagePublisher to split images into packets.
+    /// Maximum packet size used to send images
     static const int IMAGE_PACKET_SIZE = 1024;
+
+    /// Data packet used by ImagePublisher to split images into packets.
     struct ImageDataPacket{   
         int PACKET_SIZE = IMAGE_PACKET_SIZE;
         bool isFirst = false;

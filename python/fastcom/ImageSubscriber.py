@@ -29,7 +29,7 @@ import numpy as np
 import cv2
 
 """ Subscriber class.
-This class that receives data from publishers
+This class that receives images from image publishers
 """
 class ImageSubscriber:
     """ Basic initializer
@@ -56,8 +56,8 @@ class ImageSubscriber:
     def __del__(self):
         self.run = False
 
-    """ Publish data to publisher. 
-        Data is an array of bytes to be sent.
+    """ Append a custom callback to be run when an image is received. 
+        Input is expected to be a cv2 image
     """
     def appendCallback(self, callback):
         self.guard_list.acquire()
