@@ -37,9 +37,8 @@ import cv2
 
 pub = ImagePublisher.ImagePublisher(8888)
 
-img = cv2.imread("/home/bardo91/Pictures/Selection_005.png")
-
+camera = cv2.VideoCapture(0)
 while True:
-    pub.publish(img, 10)
+    ret, frame = camera.read()
+    pub.publish(frame, 10)
     print("sending")
-    time.sleep(1.0)
