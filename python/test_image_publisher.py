@@ -22,14 +22,11 @@
 import time
 import struct
 import sys
-print('\n'.join(sys.path))
 # internal trick by now....
 for idx, dir in enumerate(sys.path):
     if "ros" in dir:
         sys.path[idx] = "/home/bardo91/.local/lib/python3.5/site-packages"
 
-print("-----")
-print('\n'.join(sys.path))
 
 
 import ImagePublisher
