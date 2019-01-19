@@ -68,8 +68,6 @@ namespace fastcom{
                         isFirst = true;
                         packetId = -1;
                         totalBuffer.clear();
-                        int timeDiff = std::chrono::duration_cast< std::chrono::milliseconds >( std::chrono::system_clock::now() - _data.timeStamp).count() ;
-                        std::cout << "Speed transmission: " << timeDiff << std::endl;
                     }
                 }
             }
