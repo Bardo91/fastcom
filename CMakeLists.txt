@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
-PROJECT(fastcom VERSION 0.1)
+PROJECT(fastcom VERSION 1.0)
 
 add_definitions(-std=c++11 -pthread -lpthread)
 
