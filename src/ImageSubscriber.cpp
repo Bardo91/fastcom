@@ -43,11 +43,11 @@ namespace fastcom{
 
     void ImageSubscriber::coreCallback(ImageDataPacket &_data){
         if(isFirst == _data.isFirst){
-            if(isFirst)
-                std::cout << _data.numPackets << ": ";
+            // if(isFirst)
+            //     std::cout << _data.numPackets << ": ";
 
-            std::cout << _data.packetId << "|";
-            std::cout.flush();
+            // std::cout << _data.packetId << "|";
+            // std::cout.flush();
             
             isFirst = false;
             if(packetId + 1 == _data.packetId){
@@ -71,9 +71,10 @@ namespace fastcom{
                     }
                 }
             }
-        }else{
-            std::cout << std::endl;
         }
+        // else{
+        //     std::cout << std::endl;
+        // }
     }
 }
 
