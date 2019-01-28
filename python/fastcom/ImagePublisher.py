@@ -52,13 +52,12 @@ class ImagePublisher:
         self.client_list = []
 
         # Create socket
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_address = ('0.0.0.0', _port)
+        self.mPort = _port
         self.sock.bind(server_address)
-
-        # Start listening for connections
-        self.listen_thread = threading.Thread(target=self.__callbackListen)
-        self.listen_thread.start()
 
     """ Basic destructor
     """
@@ -80,7 +79,6 @@ class ImagePublisher:
         nPackets = int (encodedBytes/ImageDataPacket().PACKET_SIZE + 1)
         
         # Publish packets to subscribers
-        self.guard_list.acquire()
         for p_idx in range(nPackets):
             # Create packet idx
             packet = ImageDataPacket()
@@ -109,17 +107,6 @@ class ImagePublisher:
                                         *packet.buffer
                                     )
 
-            for add in self.client_list:
-                sent = self.sock.sendto(bytesPack, add)
+            sent = self.sock.sendto(bytesPack, ('<broadcast>',self.mPort))
 
-        self.guard_list.release()
-
-    def __callbackListen(self):
-        while self.run:
-            print("Waiting for connection")
-            data, address = self.sock.recvfrom(1)
-            print("Received new connection from: ", address)
-            self.guard_list.acquire()
-            self.client_list.append(address)
-            self.guard_list.release()
-
+        
