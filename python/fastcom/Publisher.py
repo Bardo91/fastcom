@@ -47,9 +47,5 @@ class Publisher:
         Data is an array of bytes to be sent.
     """
     def publish(self, data):
-        # self.guard_list.acquire()
-        # for add in self.client_list:
         sent = self.sock.sendto(data, ('<broadcast>',self.mPort))
-        # self.guard_list.release()
-
 

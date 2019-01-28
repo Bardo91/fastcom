@@ -41,9 +41,6 @@ class Subscriber:
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_address = (_host, _port)
         self.sock.bind(self.server_address)
-        
-        # Send one byte to notify publisher
-        self.sock.sendto(b'1', self.server_address)
 
         # Start listening for publisher to call callbacks
         self.listen_thread = threading.Thread(target=self.__callbackListen)
