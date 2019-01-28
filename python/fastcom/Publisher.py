@@ -30,19 +30,13 @@ class Publisher:
     """ Basic initializer
     """
     def __init__(self, _port):
-        # Some init variables
-        self.run = True
-        self.guard_list = threading.Lock()
-        self.client_list = []
-
         # Create socket
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_address = ('0.0.0.0', _port)
+        self.mPort = _port
         self.sock.bind(server_address)
-
-        # Start listening for connections
-        self.listen_thread = threading.Thread(target=self.__callbackListen)
-        self.listen_thread.start()
 
     """ Basic destructor
     """
@@ -53,17 +47,9 @@ class Publisher:
         Data is an array of bytes to be sent.
     """
     def publish(self, data):
-        self.guard_list.acquire()
-        for add in self.client_list:
-            sent = self.sock.sendto(data, add)
-        self.guard_list.release()
+        # self.guard_list.acquire()
+        # for add in self.client_list:
+        sent = self.sock.sendto(data, ('<broadcast>',self.mPort))
+        # self.guard_list.release()
 
-    def __callbackListen(self):
-        while self.run:
-            print("Waiting for connection")
-            data, address = self.sock.recvfrom(1)
-            print("Received new connection from: ", address)
-            self.guard_list.acquire()
-            self.client_list.append(address)
-            self.guard_list.release()
 

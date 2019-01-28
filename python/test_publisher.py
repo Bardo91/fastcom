@@ -25,13 +25,8 @@ import struct
 
 pub = fastcom.Publisher.Publisher(8888)
 
-
-x_img = 333.2
-y_img = 222.3
-a_img = 0.532
-
 while True:
-    bin_data = struct.pack("fff", x_img, y_img, a_img)
+    bin_data = struct.pack("ffffff", 6.1, 3.0, 3.1, 34.0, 4.5, 8.0)
     pub.publish(bin_data)
     print("sending")
     time.sleep(1.0)
