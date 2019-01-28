@@ -22,21 +22,16 @@
 import fastcom.Subscriber
 import time
 import struct
-
+import sys
 # Create subscriber
-subs = fastcom.Subscriber.Subscriber("0.0.0.0",8888)
-
-# Create nested callback with lambdas
-decodeCallback = lambda data:  struct.unpack("fff", data)
-printCallback = lambda data: print("%f, %f, %f"%(decodeCallback(data)[0], decodeCallback(data)[1], decodeCallback(data)[2]))
+subs = fastcom.Subscriber.Subscriber(sys.argv[1], int(sys.argv[2]))
 
 # Created function for callback
 def sumCallback(data):
-    pack = struct.unpack("fff", data)
-    print("Sum: %f"%(pack[0]+pack[1]+pack[2]))
+    pack = struct.unpack("ffffff", data)
+    print(pack)
 
 # Append callbacks
-subs.appendCallback(printCallback)
 subs.appendCallback(sumCallback)
 
 # Just sleep

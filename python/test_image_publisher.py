@@ -25,7 +25,7 @@ import sys
 # internal trick by now....
 for idx, dir in enumerate(sys.path):
     if "ros" in dir:
-        sys.path[idx] = "/home/bardo91/.local/lib/python3.5/site-packages"
+        sys.path[idx] = "~/.local/lib/python3.5/site-packages"
 
 
 
