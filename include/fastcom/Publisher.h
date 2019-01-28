@@ -41,8 +41,9 @@ namespace fastcom{
             void publish(DataType_ &_data);
         private:
             int mPort;
-            std::vector<boost::asio::ip::udp::endpoint*> mUdpConnections;
+            boost::asio::ip::udp::endpoint mBroadcastEndpoint;
             boost::asio::ip::udp::socket *mServerSocket;
+            boost::asio::io_service io_service;
 			std::thread mListenThread;
 			bool mRun = false;
 			std::mutex mSafeGuard;

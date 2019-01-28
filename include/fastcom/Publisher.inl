@@ -29,62 +29,27 @@ namespace fastcom {
     Publisher<DataType_>::Publisher(int _port){
         mPort = _port;
         mRun = true;
-        std::cout << "Creating UDP server in port " << mPort << "... ";
-        mListenThread = std::thread([&]() {
-            try {
-                boost::asio::io_service io_service;
-                mServerSocket = new boost::asio::ip::udp::socket(io_service, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), mPort));
-
-                std::cout << "awaiting for connetions." << std::endl;
-				while (mRun) {
-					boost::array<char, 1> recv_buf;
-					boost::asio::ip::udp::endpoint *remote_endpoint = new boost::asio::ip::udp::endpoint();
-					boost::system::error_code error;
-					mServerSocket->receive_from(boost::asio::buffer(recv_buf), *remote_endpoint, 0, error);
-
-					if (error && error != boost::asio::error::message_size) {
-						for (auto it = mUdpConnections.begin(); it != mUdpConnections.end();) {
-							if (*(*it) == *remote_endpoint) {
-								std::cout << "Connection from " << remote_endpoint->address() << " has droped" << std::endl;
-								mSafeGuard.lock();
-								it = mUdpConnections.erase(it);
-								mSafeGuard.unlock();
-							}else{
-								it++;
-							}
-						}
-					}
-					else {
-						std::cout << "Received new connection from " << remote_endpoint->address().to_string() << std::endl;
-						mSafeGuard.lock();
-						mUdpConnections.push_back(remote_endpoint);
-						mSafeGuard.unlock();
-					}
-				}
-            }
-            catch (std::exception &e) {
-                std::cerr << e.what() << std::endl;
-            }
-        });
-    }  
+		mBroadcastEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::broadcast(), 8888);
+		mServerSocket = new boost::asio::ip::udp::socket(io_service);
+		mServerSocket->open(boost::asio::ip::udp::v4());
+		boost::asio::ip::udp::endpoint remote_endpoint;
+		mServerSocket->connect(remote_endpoint);
+		mServerSocket->set_option(boost::asio::socket_base::broadcast(true));
+		
+	}
 
     //-----------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
     void Publisher<DataType_>::publish(DataType_ &_data){
-        mSafeGuard.lock();
-		for (auto &con : mUdpConnections) {
-			boost::system::error_code error;
-			boost::system::error_code ignored_error;
+		boost::system::error_code ignored_error;
+		boost::array<char, sizeof(DataType_)> send_buffer;
+		memcpy(&send_buffer[0], &_data, sizeof(DataType_));
 
-			boost::array<char, sizeof(DataType_)> send_buffer;
-			memcpy(&send_buffer[0], &_data, sizeof(DataType_));
-			try {
-				mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
-			}
-			catch (std::exception &e) {
-				std::cerr << e.what() << std::endl;
-			}
+		try {
+			mServerSocket->send_to(boost::asio::buffer(send_buffer),mBroadcastEndpoint, 0, ignored_error);
 		}
-		mSafeGuard.unlock();
+		catch (std::exception &e) {
+			std::cerr << e.what() << std::endl;
+		}
     }
 } 

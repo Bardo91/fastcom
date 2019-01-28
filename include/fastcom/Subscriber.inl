@@ -31,12 +31,8 @@ namespace fastcom{
         mEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_ip), _port);
         mSocket = new boost::asio::ip::udp::socket(io_service);
         mSocket->open(boost::asio::ip::udp::v4());
-
-        std::cout << "Trying to connect to " << _port << std::endl;
-
-        // Send query to publisher
-        boost::array<char, 1> send_buf = { { 0 } };
-        mSocket->send_to(boost::asio::buffer(send_buf), mEndpoint);
+        mSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
+        mSocket->bind(mEndpoint);
 
         mRun = true;
         mListenThread = std::thread([&](){
