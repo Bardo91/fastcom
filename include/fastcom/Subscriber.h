@@ -52,6 +52,9 @@ namespace fastcom{
             std::vector<std::function<void(DataType_ &)>> mCallbacks;
 
             std::thread mListenThread;
+            std::thread mConnectionThread;
+            bool mHasReceived = false;
+            std::chrono::system_clock::time_point mLastStamp;
             bool mRun = false;
     };
 }

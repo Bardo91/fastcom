@@ -19,29 +19,7 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
+#include <fastcom/Publisher.h>
 #include <fastcom/Subscriber.h>
-
-#include <thread>
-#include <iostream>
-#include <chrono>
-
-
-struct SimpleFloat{
-    float a;
-    float b;
-    float c;
-};
-
-int main(int _argc, char **_argv){
-
-    fastcom::Subscriber<SimpleFloat> subscriber(_argv[1], 8888);
-
-    subscriber.attachCallback([&](SimpleFloat &_data){
-        std::cout << _data.a << std::endl;
-    });
-
-    for(;;){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));   
-    }
-
-}
+#include <fastcom/ImagePublisher.h>
+#include <fastcom/ImageSubscriber.h>

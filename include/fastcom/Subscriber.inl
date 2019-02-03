@@ -34,9 +34,26 @@ namespace fastcom{
 
         std::cout << "Trying to connect to " << _port << std::endl;
 
-        // Send query to publisher
-        boost::array<char, 1> send_buf = { { 0 } };
-        mSocket->send_to(boost::asio::buffer(send_buf), mEndpoint);
+        mHasReceived = false;
+        mConnectionThread = std::thread([&](){
+            while(mRun){
+                if(!mHasReceived){
+                    // Send query to publisher
+                    boost::array<char, 1> send_buf = { { 0 } };
+                    mSocket->send_to(boost::asio::buffer(send_buf), mEndpoint);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                }else{
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    auto t1 = std::chrono::system_clock::now();
+                    auto diff = std::chrono::duration_cast<std::chrono::seconds>(t1-mLastStamp).count();
+                    if(diff > 2){
+                        mHasReceived = false;
+                    }
+                }
+            }
+        });
+        
+        mLastStamp = std::chrono::system_clock::now();
 
         mRun = true;
         mListenThread = std::thread([&](){
@@ -44,6 +61,9 @@ namespace fastcom{
                 boost::array<char, sizeof(DataType_)> recv_buf;
                 boost::asio::ip::udp::endpoint sender_endpoint;
                 size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+                
+                mHasReceived = true;
+                mLastStamp = std::chrono::system_clock::now();
 
                 DataType_ packet;
                 memcpy(&packet, &recv_buf[0], sizeof(DataType_));
