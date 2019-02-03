@@ -25,9 +25,9 @@
 #include <iostream>
 #include <chrono>
 
-int main(){
+int main(int _argc, char**_argv){
 
-    fastcom::ImageSubscriber subscriber(8888);
+    fastcom::ImageSubscriber subscriber(_argv[1], 8888);
 
     std::function<void(cv::Mat &)> callback = [&](cv::Mat &_data){
         cv::imshow("display", _data);
