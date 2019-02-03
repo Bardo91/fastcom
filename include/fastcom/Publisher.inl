@@ -23,19 +23,19 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 
-
 namespace fastcom {
     template<typename DataType_>
     Publisher<DataType_>::Publisher(int _port){
         mPort = _port;
         mRun = true;
+
 		mBroadcastEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::broadcast(), 8888);
+		
 		mServerSocket = new boost::asio::ip::udp::socket(io_service);
 		mServerSocket->open(boost::asio::ip::udp::v4());
-		boost::asio::ip::udp::endpoint remote_endpoint;
-		mServerSocket->connect(remote_endpoint);
+
 		mServerSocket->set_option(boost::asio::socket_base::broadcast(true));
-		
+		mServerSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
 	}
 
     //-----------------------------------------------------------------------------------------------------------------
