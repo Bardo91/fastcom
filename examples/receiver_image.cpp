@@ -27,7 +27,7 @@
 
 int main(){
 
-    fastcom::ImageSubscriber subscriber(8888);
+    fastcom::ImageSubscriber subscriber("192.168.1.122",8888);
 
     std::function<void(cv::Mat &)> callback = [&](cv::Mat &_data){
         cv::imshow("display", _data);

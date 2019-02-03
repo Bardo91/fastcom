@@ -29,17 +29,21 @@ namespace fastcom{
     template<typename DataType_>
     Subscriber<DataType_>::Subscriber(std::string _ip, int _port){
         mEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_ip), _port);
+        mHomeDir = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string("0.0.0.0"), _port);
+
         mSocket = new boost::asio::ip::udp::socket(io_service);
         mSocket->open(boost::asio::ip::udp::v4());
+        
         mSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-        mSocket->bind(mEndpoint);
+        // mSocket->set_option(boost::asio::socket_base::broadcast(true));
+        mSocket->bind(mHomeDir);
 
         mRun = true;
         mListenThread = std::thread([&](){
             while(mRun){
                 boost::array<char, sizeof(DataType_)> recv_buf;
                 boost::asio::ip::udp::endpoint sender_endpoint;
-                size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+                size_t len = mSocket->receive(boost::asio::buffer(recv_buf));
 
                 DataType_ packet;
                 memcpy(&packet, &recv_buf[0], sizeof(DataType_));
