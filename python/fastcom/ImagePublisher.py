@@ -23,7 +23,9 @@ import socket
 import sys
 import threading
 import struct
-import cv2
+from PIL import Image
+import io
+import numpy as np
 import array 
 
 
@@ -64,17 +66,18 @@ class ImagePublisher:
         self.run = False
 
     """ Send images to subscribers data to publisher. 
-        Images should be in cv2 format.
+        Images should be in numpy format.
     """
-    def publish(self, _image, _compression=50):
+    def publish(self, _image, _quality=50):
         # Encode image
-        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), _compression]
-        result, encoded_image = cv2.imencode('.jpg', _image, encode_param)
+        img = Image.fromarray(_image)
+        encodedImage = io.BytesIO()
+        img.save(encodedImage, format='JPEG', quality=_quality)
+        encodedBytes = encodedImage.getbuffer().nbytes
+        encoded_data = np.asarray(encodedImage.getbuffer())
 
         # Calculate packets
-        nPackets = int (len(encoded_image)/ImageDataPacket().PACKET_SIZE + 1)
-        
-        encoded_data = encoded_image.transpose().tolist()
+        nPackets = int (encodedBytes/ImageDataPacket().PACKET_SIZE + 1)
 
         # Publish packets to subscribers
         self.guard_list.acquire()
@@ -85,14 +88,14 @@ class ImagePublisher:
             packet.packetId = p_idx
             packet.isFirst = (p_idx == 0)
             packet.numPackets = nPackets
-            packet.totalSize = len(encoded_image)
+            packet.totalSize = encodedBytes
 
             endSize = ImageDataPacket().PACKET_SIZE
             if(p_idx == nPackets-1):
-                endSize = len(encoded_image) % ImageDataPacket().PACKET_SIZE
+                endSize = encodedBytes % ImageDataPacket().PACKET_SIZE
 
             packet.packetSize = endSize
-            packet.buffer[0:endSize] = encoded_data[0][ImageDataPacket().PACKET_SIZE*p_idx:ImageDataPacket().PACKET_SIZE*p_idx+endSize]
+            packet.buffer[0:endSize] = encoded_data[ImageDataPacket().PACKET_SIZE*p_idx:ImageDataPacket().PACKET_SIZE*p_idx+endSize]
 
 
             # Pack data

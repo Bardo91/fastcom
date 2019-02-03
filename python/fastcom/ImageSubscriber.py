@@ -24,9 +24,9 @@ import sys
 import threading
 import fastcom.ImagePublisher
 import struct
-import numpy as np
-
-import cv2
+import numpy
+from PIL import Image
+import io
 
 """ Subscriber class.
 This class that receives images from image publishers
@@ -57,7 +57,7 @@ class ImageSubscriber:
         self.run = False
 
     """ Append a custom callback to be run when an image is received. 
-        Input is expected to be a cv2 image
+        Input is expected to be a numpy image
     """
     def appendCallback(self, callback):
         self.guard_list.acquire()
@@ -68,7 +68,7 @@ class ImageSubscriber:
         while True:
             isFirstPacket = True
             currPacketId = -1
-            dataBuffer = []
+            dataBuffer = numpy.array([],dtype=numpy.uint8)
             while True:
                 # Get and decode data
                 expectedRecvSize = struct.calcsize("i?iiii"+str(fastcom.ImagePublisher.ImageDataPacket().PACKET_SIZE)+"B")
@@ -88,18 +88,20 @@ class ImageSubscriber:
                     isFirstPacket = False
                     # Check id packet
                     if(recvPacket.packetId == currPacketId+1):
-                        dataBuffer.extend(recvPacket.buffer)
+                        dataBuffer = numpy.append(dataBuffer, recvPacket.buffer)
                         currPacketId = currPacketId+1
                         # If last packet
                         if(recvPacket.packetId == recvPacket.numPackets-1):
                             if(len(dataBuffer) == recvPacket.totalSize):
                                 # Decode img
-                                decodedImg = cv2.imdecode(np.asarray(dataBuffer, dtype=np.uint8),1)
+                                ioBuffer = io.BytesIO(numpy.uint8(dataBuffer).tobytes())
+                                ioBuffer.seek(0)
+                                decodedImg = Image.open(ioBuffer)
 
                                 # Call callbacks with img
                                 self.guard_list.acquire()
                                 for call in self.callbacks_list:
-                                    call(decodedImg)
+                                    call(numpy.array(decodedImg))
                                 self.guard_list.release()
 
                                 # Restore default variables
