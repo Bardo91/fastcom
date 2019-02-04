@@ -25,6 +25,7 @@
 #include <boost/asio.hpp>
 #include <thread>
 #include <mutex>
+#include <boost/asio/deadline_timer.hpp>
 
 namespace fastcom{
     /// Class to subscribe to information. 
@@ -44,6 +45,11 @@ namespace fastcom{
             void attachCallback(std::function<void(DataType_ &)> _callback);
 
         private:
+            void asyncConnectionHandle(const boost::system::error_code &error, std::size_t length);
+            bool mReceivedConnectionNotification = false;
+            void checkDeadline();
+
+        private:
             boost::asio::ip::udp::endpoint mEndpoint;
             boost::asio::ip::udp::socket *mSocket;
             boost::asio::io_service io_service;
@@ -53,7 +59,8 @@ namespace fastcom{
 
             std::thread mListenThread;
             std::thread mConnectionThread;
-            bool mHasReceived = false;
+            boost::asio::deadline_timer mDeadlineTimout;
+
             std::chrono::system_clock::time_point mLastStamp;
             bool mRun = false;
     };
