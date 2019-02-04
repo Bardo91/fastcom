@@ -44,8 +44,20 @@ class ImageSubscriber:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.server_address = (_host, _port)
         
-        # Send one byte to notify publisher
-        self.sock.sendto(b'1', self.server_address)
+        # Ensure connection
+        self.sock.setblocking(False)
+        self.sock.settimeout(0.2)
+        receivedConnection = False
+        while not receivedConnection:
+            try:
+                self.sock.sendto(b'1', self.server_address)
+                data, address = self.sock.recvfrom(1)
+                if(len(data) == 1):
+                    receivedConnection = True
+            except socket.timeout:
+                pass
+
+        self.sock.setblocking(True)
 
         # Start listening for publisher to call callbacks
         self.listen_thread = threading.Thread(target=self.__callbackListen)
