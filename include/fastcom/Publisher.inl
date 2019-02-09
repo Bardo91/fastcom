@@ -29,7 +29,7 @@ namespace fastcom {
     Publisher<DataType_>::Publisher(int _port){
         mPort = _port;
         mRun = true;
-        std::cout << "Creating UDP server in port " << mPort << "... ";
+        // std::cout << "Creating UDP server in port " std::to_string(mPort) << "... ";
         mListenThread = std::thread([&]() {
             try {
                 boost::asio::io_service io_service;
@@ -45,7 +45,7 @@ namespace fastcom {
 					if (error && error != boost::asio::error::message_size) {
 						for (auto it = mUdpConnections.begin(); it != mUdpConnections.end();) {
 							if (*(*it) == *remote_endpoint) {
-								std::cout << "Connection from " << remote_endpoint->address() << " has droped" << std::endl;
+								// std::cout << "Connection from " << remote_endpoint->address() << " has droped" << std::endl;
 								mSafeGuard.lock();
 								it = mUdpConnections.erase(it);
 								mSafeGuard.unlock();
@@ -58,7 +58,7 @@ namespace fastcom {
 						// Send confirmation
 						boost::array<char, 1> send_buf = { { 0 } };
 						mServerSocket->send_to(boost::asio::buffer(send_buf), *remote_endpoint);
-						std::cout << "Received new connection from " << remote_endpoint->address().to_string() << std::endl;
+						// std::cout << "Received new connection from " << remote_endpoint->address().to_string() << std::endl;
 						mSafeGuard.lock();
 						bool addCon = true;
 						for(auto &con : mUdpConnections){

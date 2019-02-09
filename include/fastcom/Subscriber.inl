@@ -37,7 +37,7 @@ namespace fastcom{
 
         checkDeadline();
 
-        std::cout << "Trying to connect to " << _port << std::endl;
+        // std::cout << "Trying to connect to " + std::to_string(_port) << std::endl;
         mConnectionThread = std::thread([&](){
             try {	
 				for(;;){
@@ -92,7 +92,7 @@ namespace fastcom{
 			}catch (std::exception &e) {
 				std::cerr << e.what() << std::endl;
 			}
-			std::cout << "Closing reading of new connections" << std::endl;
+			// std::cout << "Closing reading of new connections" << std::endl;
         });
         
         mLastStamp = std::chrono::system_clock::now();
