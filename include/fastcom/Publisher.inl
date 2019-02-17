@@ -96,4 +96,31 @@ namespace fastcom {
 		}
 		mSafeGuard.unlock();
     }
+	
+	//-----------------------------------------------------------------------------------------------------------------
+    template<>
+    inline void Publisher<std::string>::publish(std::string &_data){
+        mSafeGuard.lock();
+		for (auto &con : mUdpConnections) {
+			boost::system::error_code error;
+			boost::system::error_code ignored_error;
+
+			uint16_t sizeString = _data.size();
+			
+			assert(sizeString < 4096);
+
+			auto size_buffer = boost::asio::buffer((void*) &sizeString, sizeof(uint16_t));
+			auto send_buffer = boost::asio::buffer(_data.c_str(), _data.size());
+
+			try {
+				mServerSocket->send_to(size_buffer, *con, 0, ignored_error);
+				mServerSocket->send_to(send_buffer, *con, 0, ignored_error);
+			}
+			catch (std::exception &e) {
+				std::cerr << e.what() << std::endl;
+			}
+		}
+		mSafeGuard.unlock();
+    }
+
 } 

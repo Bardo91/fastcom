@@ -46,7 +46,7 @@ namespace fastcom{
                     mSocket->send_to(boost::asio::buffer(send_buf), mEndpoint);
                     
                     // Set timeout
-                    mDeadlineTimout.expires_from_now(boost::posix_time::milliseconds(200));
+                    mDeadlineTimout.expires_from_now(boost::posix_time::milliseconds(1000));
 
                     // Wait for response
                     boost::system::error_code ec = boost::asio::error::would_block;
@@ -62,28 +62,12 @@ namespace fastcom{
                                                     );
 
 					io_service.run_one();					
-                    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1200));
                     
                     if(mReceivedConnectionNotification){
                         mRun = true;
-                        mListenThread = std::thread([&](){
-                            while(mRun){
-                                boost::array<char, sizeof(DataType_)> recv_buf;
-                                boost::asio::ip::udp::endpoint sender_endpoint;
-                                size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-                                
-                                mLastStamp = std::chrono::system_clock::now();
-
-                                DataType_ packet;
-                                memcpy(&packet, &recv_buf[0], sizeof(DataType_));
-
-                                mCallbackGuard.lock();
-                                for(auto &callback: mCallbacks){
-                                    callback(packet);
-                                }
-                                mCallbackGuard.unlock();
-                            }
-                        });
+                        std::cout << "Received connection" << std::endl;
+                        mListenThread = std::thread(&Subscriber<DataType_>::dataListenCallback, this);
 
                         break;
                     }
@@ -127,6 +111,57 @@ namespace fastcom{
             mDeadlineTimout.expires_at(boost::posix_time::pos_infin);
         }
         mDeadlineTimout.async_wait(boost::bind(&Subscriber<DataType_>::checkDeadline, this));
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------
+    template<typename DataType_>
+    void Subscriber<DataType_>::dataListenCallback(){
+        while(mRun){
+            boost::array<char, sizeof(DataType_)> recv_buf;
+            boost::asio::ip::udp::endpoint sender_endpoint;
+            size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+            
+            mLastStamp = std::chrono::system_clock::now();
+
+            DataType_ packet;
+            memcpy(&packet, &recv_buf[0], sizeof(DataType_));
+
+            mCallbackGuard.lock();
+            for(auto &callback: mCallbacks){
+                callback(packet);
+            }
+            mCallbackGuard.unlock();
+        }
+    }
+
+      //---------------------------------------------------------------------------------------------------------------------
+    template<>
+    inline void Subscriber<std::string>::dataListenCallback(){
+        while(mRun){
+            std::cout << "waiting to receive string" << std::endl;
+            boost::array<char, sizeof(uint)> recv_buf_size;
+            boost::asio::ip::udp::endpoint sender_endpoint;
+            size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf_size), sender_endpoint);
+
+            uint16_t sizeString;
+            memcpy(&sizeString, &recv_buf_size[0], sizeof(uint16_t));
+            assert(sizeString < 4096);
+
+            char native_buffer[4096];
+            auto recv_buf_string = boost::asio::buffer(native_buffer, sizeString);
+            len = mSocket->receive_from(recv_buf_string, sender_endpoint);
+            
+            assert(len == sizeString);
+            
+            mLastStamp = std::chrono::system_clock::now();
+
+            std::string packet (native_buffer, len);
+            mCallbackGuard.lock();
+            for(auto &callback: mCallbacks){
+                callback(packet);
+            }
+            mCallbackGuard.unlock();
+        }
     }
 
 }

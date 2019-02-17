@@ -48,6 +48,7 @@ namespace fastcom{
             void asyncConnectionHandle(const boost::system::error_code &error, std::size_t length);
             bool mReceivedConnectionNotification = false;
             void checkDeadline();
+            void dataListenCallback();
 
         private:
             boost::asio::ip::udp::endpoint mEndpoint;
