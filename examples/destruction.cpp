@@ -19,39 +19,44 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_PUBLISHER_H_
-#define _FASTCOM_PUBLISHER_H_
+#include <fastcom/Publisher.h>
+#include <fastcom/Subscriber.h>
 
-#include <boost/asio.hpp>
 #include <thread>
-#include <mutex>
+#include <iostream>
+#include <chrono>
 
+struct SimpleFloat{
+    float a;
+    float b;
+    float c;
+};
 
-namespace fastcom{
-    /// Class that broadcast information.
-    template<typename DataType_>
-    class Publisher{
-        public:
-            /// Basic constructor. It binds to an specific port and sends information to subscriber
-            /// \param _port: ports to be binded.
-            Publisher(int _port);
+int main(){
 
-            /// Basic desconstructor.
-            ~Publisher();
+    fastcom::Publisher<SimpleFloat> *publisher;
+    fastcom::Subscriber<SimpleFloat> *subscriber;
 
-            /// Publish information to the subscribers
-            /// \param _data: data to be published.
-            void publish(DataType_ &_data);
-        private:
-            int mPort;
-            std::vector<boost::asio::ip::udp::endpoint*> mUdpConnections;
-            boost::asio::ip::udp::socket *mServerSocket;
-			std::thread mListenThread;
-			bool mRun = false;
-			std::mutex mSafeGuard;
-    };
+    for(unsigned iter = 0; iter < 10; iter++){
+		publisher = new fastcom::Publisher<SimpleFloat>(8888);
+		subscriber = new fastcom::Subscriber<SimpleFloat>("0.0.0.0", 8888);
+
+	    subscriber->attachCallback([&](SimpleFloat &_data){
+		std::cout << _data.a << std::endl;
+	    });
+
+		
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));   
+	    SimpleFloat data;
+	    data.a = 0;
+	    for(int i = 1;i<10;i++){
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));   
+		publisher->publish(data);
+		data.a +=1;
+	    }
+
+	    delete publisher;
+	    delete subscriber;
+	    std::cout << "start again" << std::endl;
+    }
 }
-
-#include <fastcom/Publisher.inl>
-
-#endif

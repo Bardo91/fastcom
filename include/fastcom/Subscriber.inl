@@ -30,7 +30,7 @@ namespace fastcom{
     template<typename DataType_>
     Subscriber<DataType_>::Subscriber(std::string _ip, int _port): mDeadlineTimout(io_service) {
         mDeadlineTimout.expires_at(boost::posix_time::pos_infin);
-
+	
         mEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_ip), _port);
         mSocket = new boost::asio::ip::udp::socket(io_service);
         mSocket->open(boost::asio::ip::udp::v4());
@@ -70,29 +70,33 @@ namespace fastcom{
                             while(mRun){
                                 boost::array<char, sizeof(DataType_)> recv_buf;
                                 boost::asio::ip::udp::endpoint sender_endpoint;
-                                size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-                                
-                                mLastStamp = std::chrono::system_clock::now();
+				try{
+		                        size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+		                        
+		                        mLastStamp = std::chrono::system_clock::now();
 
-                                DataType_ packet;
-                                memcpy(&packet, &recv_buf[0], sizeof(DataType_));
+		                        DataType_ packet;
+		                        memcpy(&packet, &recv_buf[0], sizeof(DataType_));
 
-                                mCallbackGuard.lock();
-                                for(auto &callback: mCallbacks){
-                                    callback(packet);
-                                }
-                                mCallbackGuard.unlock();
+		                        mCallbackGuard.lock();
+		                        for(auto &callback: mCallbacks){
+		                            callback(packet);
+		                        }
+		                        mCallbackGuard.unlock();
+				}catch(std::exception &e ){
+					mRun = false;
+				}
                             }
                         });
 
                         break;
                     }
-					io_service.reset();
-				}
-			}catch (std::exception &e) {
-				std::cerr << e.what() << std::endl;
+				io_service.reset();
 			}
-			// std::cout << "Closing reading of new connections" << std::endl;
+		}catch (std::exception &e) {
+			std::cerr << e.what() << std::endl;
+		}
+		// std::cout << "Closing reading of new connections" << std::endl;
         });
         
         mLastStamp = std::chrono::system_clock::now();
@@ -101,6 +105,30 @@ namespace fastcom{
     //---------------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
     Subscriber<DataType_>::Subscriber(int _port): Subscriber("0.0.0.0", _port) {  }
+
+    //---------------------------------------------------------------------------------------------------------------------
+    template<typename DataType_>
+    Subscriber<DataType_>::~Subscriber() {  
+	// Prevent publisher to keep working	
+	mRun = false;
+	// Unlock self socket
+	io_service.stop();
+	boost::system::error_code ec;
+	if(mSocket){
+		mSocket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+		mSocket->close();
+	}
+
+	// Join thread
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        if(mListenThread.joinable()){
+            mListenThread.join();
+        }   
+	if(mConnectionThread.joinable()){
+            mConnectionThread.join();
+        }        
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
 
     //---------------------------------------------------------------------------------------------------------------------
     template<typename DataType_>

@@ -41,6 +41,10 @@ namespace fastcom{
             /// \param _port: specific port in the IP to be binded
             Subscriber(int _port);
 
+            /// Destructor
+            ~Subscriber();
+
+            
             /// Attach a callback to a subscription. Each time data arrives the attached callback are called
             void attachCallback(std::function<void(DataType_ &)> _callback);
 
