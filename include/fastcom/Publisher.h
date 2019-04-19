@@ -36,6 +36,9 @@ namespace fastcom{
             /// \param _port: ports to be binded.
             Publisher(int _port);
 
+            /// Basic desconstructor.
+            ~Publisher();
+
             /// Publish information to the subscribers
             /// \param _data: data to be published.
             void publish(DataType_ &_data);

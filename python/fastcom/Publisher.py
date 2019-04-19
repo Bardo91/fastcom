@@ -49,3 +49,17 @@ class Publisher:
     def publish(self, data):
         sent = self.sock.sendto(data, ('<broadcast>',self.mPort))
 
+    def __callbackListen(self):
+        while self.run:
+            # print("Waiting for connection")
+            data, address = self.sock.recvfrom(1)
+            # print("Received new connection from: ", address)
+            self.sock.sendto(b'1', address)
+            self.guard_list.acquire()
+            addCon = True
+            for addr in self.client_list:
+                if addr == address:
+                    addCon = False
+            if addCon:
+                self.client_list.append(address)
+            self.guard_list.release()

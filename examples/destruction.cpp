@@ -19,48 +19,44 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_IMAGEPUBLISHER_H_
-#define _FASTCOM_IMAGEPUBLISHER_H_
-
 #include <fastcom/Publisher.h>
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
+#include <fastcom/Subscriber.h>
+
+#include <thread>
+#include <iostream>
 #include <chrono>
 
-#ifdef FASTCOM_HAS_OPENCV
+struct SimpleFloat{
+    float a;
+    float b;
+    float c;
+};
 
-namespace fastcom{
-    /// Maximum packet size used to send images
-    static const int IMAGE_PACKET_SIZE = 1024;
+int main(){
 
-    /// Data packet used by ImagePublisher to split images into packets.
-    struct ImageDataPacket{   
-        int PACKET_SIZE = IMAGE_PACKET_SIZE;
-        bool isFirst = false;
-        int packetId = 0;
-        int numPackets = 0;
-        int totalSize = 0;
-        int packetSize = 0;
-        char buffer[IMAGE_PACKET_SIZE];
-    };
+    fastcom::Publisher<SimpleFloat> *publisher;
+    fastcom::Subscriber<SimpleFloat> *subscriber;
 
-    /// Specialized Publisher to publish images to subscribers
-    class ImagePublisher {
-        public:
-            /// Basic constructor. It binds to an specific port and sends information to subscriber.
-            /// \param _port: ports to be binded.
-            ImagePublisher(int _port);
+    for(unsigned iter = 0; iter < 10; iter++){
+		publisher = new fastcom::Publisher<SimpleFloat>(8888);
+		subscriber = new fastcom::Subscriber<SimpleFloat>("0.0.0.0", 8888);
 
-            /// Publish an image to the subscribers.
-            /// \param _image: image to be published.
-            /// \param _compression: JPG compression rate.
-            void publish(cv::Mat &_image, int _compression = 50);
-        private:
-            Publisher<ImageDataPacket> *mPublisher;
-    };
+	    subscriber->attachCallback([&](SimpleFloat &_data){
+		std::cout << _data.a << std::endl;
+	    });
+
+		
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));   
+	    SimpleFloat data;
+	    data.a = 0;
+	    for(int i = 1;i<10;i++){
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));   
+		publisher->publish(data);
+		data.a +=1;
+	    }
+
+	    delete publisher;
+	    delete subscriber;
+	    std::cout << "start again" << std::endl;
+    }
 }
-
-#endif
-
-#endif

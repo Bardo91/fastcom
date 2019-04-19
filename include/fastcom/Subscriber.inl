@@ -22,12 +22,15 @@
 
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
 #include <iostream>
 
 namespace fastcom{
     //---------------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
-    Subscriber<DataType_>::Subscriber(std::string _ip, int _port){
+    Subscriber<DataType_>::Subscriber(std::string _ip, int _port): mDeadlineTimout(io_service) {
+        mDeadlineTimout.expires_at(boost::posix_time::pos_infin);
+	
         mEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_ip), _port);
         mHomeDir = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string("0.0.0.0"), _port);
 
@@ -38,23 +41,71 @@ namespace fastcom{
         // mSocket->set_option(boost::asio::socket_base::broadcast(true));
         mSocket->bind(mHomeDir);
 
-        mRun = true;
-        mListenThread = std::thread([&](){
-            while(mRun){
-                boost::array<char, sizeof(DataType_)> recv_buf;
-                boost::asio::ip::udp::endpoint sender_endpoint;
-                size_t len = mSocket->receive(boost::asio::buffer(recv_buf));
+        checkDeadline();
 
-                DataType_ packet;
-                memcpy(&packet, &recv_buf[0], sizeof(DataType_));
+        // std::cout << "Trying to connect to " + std::to_string(_port) << std::endl;
+        mConnectionThread = std::thread([&](){
+            try {	
+				for(;;){
+                    // Send query to publisher
+                    boost::array<char, 1> send_buf = { { 0 } };
+                    mSocket->send_to(boost::asio::buffer(send_buf), mEndpoint);
+                    
+                    // Set timeout
+                    mDeadlineTimout.expires_from_now(boost::posix_time::milliseconds(200));
 
-                mCallbackGuard.lock();
-                for(auto &callback: mCallbacks){
-                    callback(packet);
-                }
-                mCallbackGuard.unlock();
-            }
+                    // Wait for response
+                    boost::system::error_code ec = boost::asio::error::would_block;
+                    std::size_t length = 0;
+
+					boost::array<char, 1> recv_buf;
+					mSocket->async_receive_from( boost::asio::buffer(recv_buf), 
+                                                    mEndpoint, 
+                                                    boost::bind(
+                                                            &Subscriber<DataType_>::asyncConnectionHandle, this,
+                                                            boost::asio::placeholders::error,
+                                                            boost::asio::placeholders::bytes_transferred)
+                                                    );
+
+					io_service.run_one();					
+                    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                    
+                    if(mReceivedConnectionNotification){
+                        mRun = true;
+                        mListenThread = std::thread([&](){
+                            while(mRun){
+                                boost::array<char, sizeof(DataType_)> recv_buf;
+                                boost::asio::ip::udp::endpoint sender_endpoint;
+				try{
+		                        size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+		                        
+		                        mLastStamp = std::chrono::system_clock::now();
+
+		                        DataType_ packet;
+		                        memcpy(&packet, &recv_buf[0], sizeof(DataType_));
+
+		                        mCallbackGuard.lock();
+		                        for(auto &callback: mCallbacks){
+		                            callback(packet);
+		                        }
+		                        mCallbackGuard.unlock();
+				}catch(std::exception &e ){
+					mRun = false;
+				}
+                            }
+                        });
+
+                        break;
+                    }
+				io_service.reset();
+			}
+		}catch (std::exception &e) {
+			std::cerr << e.what() << std::endl;
+		}
+		// std::cout << "Closing reading of new connections" << std::endl;
         });
+        
+        mLastStamp = std::chrono::system_clock::now();
     }
 
     //---------------------------------------------------------------------------------------------------------------------
@@ -63,10 +114,53 @@ namespace fastcom{
 
     //---------------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
+    Subscriber<DataType_>::~Subscriber() {  
+	// Prevent publisher to keep working	
+	mRun = false;
+	// Unlock self socket
+	io_service.stop();
+	boost::system::error_code ec;
+	if(mSocket){
+		mSocket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+		mSocket->close();
+	}
+
+	// Join thread
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        if(mListenThread.joinable()){
+            mListenThread.join();
+        }   
+	if(mConnectionThread.joinable()){
+            mConnectionThread.join();
+        }        
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------
+    template<typename DataType_>
     void Subscriber<DataType_>::attachCallback(std::function<void(DataType_ &)> _callback){
         mCallbackGuard.lock();
         mCallbacks.push_back(_callback);
         mCallbackGuard.unlock();
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------
+    template<typename DataType_>
+    void Subscriber<DataType_>::asyncConnectionHandle(const boost::system::error_code & error,  std::size_t length){
+        if(length == 1)
+        {
+            mReceivedConnectionNotification = true;
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------
+    template<typename DataType_>
+    void Subscriber<DataType_>::checkDeadline() {
+        if (mDeadlineTimout.expires_at() <= boost::asio::deadline_timer::traits_type::now()) {
+            mSocket->cancel();
+            mDeadlineTimout.expires_at(boost::posix_time::pos_infin);
+        }
+        mDeadlineTimout.async_wait(boost::bind(&Subscriber<DataType_>::checkDeadline, this));
     }
 
 }

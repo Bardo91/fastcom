@@ -67,6 +67,10 @@ add_executable(example_receiver_image "examples/receiver_image.cpp")
 target_include_directories(example_receiver_image PRIVATE "./include")
 target_link_libraries(example_receiver_image LINK_PUBLIC fastcom)
 
+add_executable(example_destruction "examples/destruction.cpp")
+target_include_directories(example_destruction PRIVATE "./include")
+target_link_libraries(example_destruction LINK_PUBLIC fastcom)
+
 
 #########################################
 ######			INSTALL 		   ######

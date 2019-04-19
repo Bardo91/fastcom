@@ -32,9 +32,9 @@ struct SimpleFloat{
     float c;
 };
 
-int main(){
+int main(int _argc, char **_argv){
 
-    fastcom::Subscriber<SimpleFloat> subscriber("192.168.1.122", 8888);
+    fastcom::Subscriber<SimpleFloat> subscriber(_argv[1], 8888);
 
     subscriber.attachCallback([&](SimpleFloat &_data){
         std::cout << _data.a << std::endl;

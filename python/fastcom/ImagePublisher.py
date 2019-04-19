@@ -25,6 +25,7 @@ import threading
 import struct
 from PIL import Image
 import io
+import numpy as np
 import array 
 import numpy as np
 
@@ -65,11 +66,11 @@ class ImagePublisher:
         self.run = False
 
     """ Send images to subscribers data to publisher. 
-        Images should be numpy format.
+        Images should be in numpy format.
     """
     def publish(self, _image, _quality=50):
-        img = Image.fromarray(_image)
         # Encode image
+        img = Image.fromarray(_image)
         encodedImage = io.BytesIO()
         img.save(encodedImage, format='JPEG', quality=_quality)
         encodedBytes = encodedImage.getbuffer().nbytes
@@ -77,7 +78,7 @@ class ImagePublisher:
 
         # Calculate packets
         nPackets = int (encodedBytes/ImageDataPacket().PACKET_SIZE + 1)
-        
+
         # Publish packets to subscribers
         for p_idx in range(nPackets):
             # Create packet idx
@@ -109,4 +110,20 @@ class ImagePublisher:
 
             sent = self.sock.sendto(bytesPack, ('<broadcast>',self.mPort))
 
-        
+        self.guard_list.release()
+
+    def __callbackListen(self):
+        while self.run:
+            # print("Waiting for connection")
+            data, address = self.sock.recvfrom(1)
+            # print("Received new connection from: ", address)
+            self.sock.sendto(b'1', address)
+            self.guard_list.acquire()
+            addCon = True
+            for addr in self.client_list:
+                if addr == address:
+                    addCon = False
+            if addCon:
+                self.client_list.append(address)
+            self.guard_list.release()
+
