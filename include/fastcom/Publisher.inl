@@ -23,6 +23,7 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 
+
 namespace fastcom {
     template<typename DataType_>
     Publisher<DataType_>::Publisher(int _port){
@@ -105,8 +106,14 @@ namespace fastcom {
 			boost::system::error_code error;
 			boost::system::error_code ignored_error;
 
-		try {
-			mServerSocket->send_to(boost::asio::buffer(send_buffer),mBroadcastEndpoint, 0, ignored_error);
+			boost::array<char, sizeof(DataType_)> send_buffer;
+			memcpy(&send_buffer[0], &_data, sizeof(DataType_));
+			try {
+				mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
+			}
+			catch (std::exception &e) {
+				std::cerr << e.what() << std::endl;
+			}
 		}
 	    mSafeGuard.unlock();
         }    

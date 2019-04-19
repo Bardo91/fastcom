@@ -55,7 +55,6 @@ namespace fastcom{
 
         private:
             boost::asio::ip::udp::endpoint mEndpoint;
-            boost::asio::ip::udp::endpoint mHomeDir;
             boost::asio::ip::udp::socket *mSocket;
             boost::asio::io_service io_service;
 

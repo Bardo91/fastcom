@@ -32,7 +32,7 @@ for idx, dir in enumerate(sys.path):
 import fastcom.ImageSubscriber
 import cv2
 
-pub = fastcom.ImageSubscriber.ImageSubscriber(sys.argv[1], int(sys.argv[2]))
+pub = fastcom.ImageSubscriber.ImageSubscriber("0.0.0.0", 8888)
 
 def showImage(_image):
     cv2.imshow("image", _image)

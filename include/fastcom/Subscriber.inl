@@ -32,14 +32,8 @@ namespace fastcom{
         mDeadlineTimout.expires_at(boost::posix_time::pos_infin);
 	
         mEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_ip), _port);
-        mHomeDir = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string("0.0.0.0"), _port);
-
         mSocket = new boost::asio::ip::udp::socket(io_service);
         mSocket->open(boost::asio::ip::udp::v4());
-        
-        mSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-        // mSocket->set_option(boost::asio::socket_base::broadcast(true));
-        mSocket->bind(mHomeDir);
 
         checkDeadline();
 

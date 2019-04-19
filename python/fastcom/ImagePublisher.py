@@ -27,7 +27,6 @@ from PIL import Image
 import io
 import numpy as np
 import array 
-import numpy as np
 
 
 IMAGE_PACKET_SIZE = 1024
@@ -53,12 +52,13 @@ class ImagePublisher:
         self.client_list = []
 
         # Create socket
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         server_address = ('0.0.0.0', _port)
-        self.mPort = _port
         self.sock.bind(server_address)
+
+        # Start listening for connections
+        self.listen_thread = threading.Thread(target=self.__callbackListen)
+        self.listen_thread.start()
 
     """ Basic destructor
     """
@@ -80,6 +80,7 @@ class ImagePublisher:
         nPackets = int (encodedBytes/ImageDataPacket().PACKET_SIZE + 1)
 
         # Publish packets to subscribers
+        self.guard_list.acquire()
         for p_idx in range(nPackets):
             # Create packet idx
             packet = ImageDataPacket()
@@ -108,7 +109,8 @@ class ImagePublisher:
                                         *packet.buffer
                                     )
 
-            sent = self.sock.sendto(bytesPack, ('<broadcast>',self.mPort))
+            for add in self.client_list:
+                sent = self.sock.sendto(bytesPack, add)
 
         self.guard_list.release()
 
