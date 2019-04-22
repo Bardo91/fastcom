@@ -19,7 +19,49 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/Publisher.h>
-#include <fastcom/Subscriber.h>
-#include <fastcom/ImagePublisher.h>
-#include <fastcom/ImageSubscriber.h>
+#ifndef _FASTCOM_SERVICESERVER_H_
+#define _FASTCOM_SERVICESERVER_H_
+
+#include <boost/asio.hpp>
+#include<functional>
+#include <thread>
+
+namespace fastcom{
+    #define SERVICE_MESSAGE_TYPE \
+    public: \
+	bool checkType(size_t _hash){ \
+		return typeid(*this).hash_code() == _hash;\
+	}
+
+    template<typename RequestType_, typename ResponseType_>
+    class ServiceServer{
+    public:
+        /// Basic constructor. Uses given port to accept connections
+        /// \param _port: port to accept connections
+        ServiceServer(int _port, std::function<void (RequestType_ &, ResponseType_ &)> _callback);
+
+        /// Basic destructor. Stop and disable the server.
+        ~ServiceServer();
+
+    private:
+        size_t retreiveHashCode(boost::asio::ip::tcp::socket *_client);
+        
+        template<typename T_>
+        T_ receiveType(boost::asio::ip::tcp::socket *_client);
+
+    private:
+        int port_;
+
+        boost::asio::io_service ioService_;
+        boost::asio::ip::tcp::acceptor serverSocket_;
+
+        bool acceptingConnections_;
+        std::thread acceptingThread_;
+
+        std::function<void (RequestType_ &, ResponseType_ &)> callback_;
+    };
+}
+
+#include <fastcom/ServiceServer.inl>
+
+#endif

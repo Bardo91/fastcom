@@ -19,7 +19,32 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/Publisher.h>
-#include <fastcom/Subscriber.h>
-#include <fastcom/ImagePublisher.h>
-#include <fastcom/ImageSubscriber.h>
+#ifndef _FASTCOM_SERVICECLIENT_H_
+#define _FASTCOM_SERVICECLIENT_H_
+
+#include <boost/asio.hpp>
+#include <thread>
+
+namespace fastcom{
+    template<typename RequestType_, typename ResponseType_>
+    class ServiceClient{
+    public:
+        ServiceClient(std::string _ip, int _port);
+        ResponseType_ call(RequestType_ &_req);
+
+    private:
+        template<typename T_>
+        T_ receiveType(boost::asio::ip::tcp::socket *_socket);
+
+    private:
+        boost::asio::io_service ioService_;
+
+        std::string ip_;
+        int port_;
+
+    };
+}
+
+#include <fastcom/ServiceClient.inl>
+
+#endif

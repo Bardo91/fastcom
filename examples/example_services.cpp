@@ -19,7 +19,41 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/Publisher.h>
-#include <fastcom/Subscriber.h>
-#include <fastcom/ImagePublisher.h>
-#include <fastcom/ImageSubscriber.h>
+
+#include <fastcom/ServiceServer.h>
+#include <fastcom/ServiceClient.h>
+
+struct RequestInt{
+    SERVICE_MESSAGE_TYPE
+    int a;
+};
+
+struct RequestInt2{
+    SERVICE_MESSAGE_TYPE
+    int a;
+};
+
+
+struct ResponseInt{
+    SERVICE_MESSAGE_TYPE
+    int a;
+};
+
+int main(void){
+
+    fastcom::ServiceServer<RequestInt, ResponseInt> server(9999, [&](RequestInt &_req, ResponseInt &_res){
+            std::cout <<"Received call: " << _req.a <<std::endl;
+            _res.a = _req.a+1;
+    });
+
+    fastcom::ServiceClient<RequestInt2, ResponseInt> client("0.0.0.0", 9999);
+
+    std::cout << "sending calls" << std::endl;
+    RequestInt2 req;
+    for( unsigned i = 0; i < 10;i++){
+        req.a = i*4;
+        client.call(req);
+    }
+
+    std::cout << "Finished calls" << std::endl;
+}

@@ -19,7 +19,17 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/Publisher.h>
-#include <fastcom/Subscriber.h>
-#include <fastcom/ImagePublisher.h>
-#include <fastcom/ImageSubscriber.h>
+
+#ifndef FASTCOM_FASTCOMVERSION_H_
+#define FASTCOM_FASTCOMVERSION_H_
+
+#include <string>
+
+namespace fastcom{
+    std::string FASTCOM_VERSION = "1.0.5.2";
+    std::string FASTCOM_VERSION_MAJOR = "1";
+    std::string FASTCOM_VERSION_MINOR = "0";
+    std::string FASTCOM_VERSION_REVIEW = "5.2";
+}
+
+#endif

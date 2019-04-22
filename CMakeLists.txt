@@ -75,6 +75,11 @@ target_include_directories(example_destruction PRIVATE "./include")
 target_link_libraries(example_destruction LINK_PUBLIC fastcom)
 
 
+add_executable(example_services "examples/example_services.cpp")
+target_include_directories(example_services PRIVATE "./include")
+target_link_libraries(example_services LINK_PUBLIC fastcom)
+
+
 #########################################
 ######			INSTALL 		   ######
 #########################################
