@@ -30,9 +30,13 @@ namespace fastcom{
     #define SERVICE_MESSAGE_TYPE \
     public: \
 	bool checkType(size_t _hash){ \
-		return typeid(*this).hash_code() == _hash;\
+		return this->type() == _hash; \
+	} \
+	size_t type(){ \
+		return 0; \
 	}
 
+    /// Service Server class
     template<typename RequestType_, typename ResponseType_>
     class ServiceServer{
     public:

@@ -43,7 +43,7 @@ namespace fastcom{
 
                     std::thread clientThread([&](boost::asio::ip::tcp::socket *_client){
                         // Send boost version to check compatibility.
-                        boost::asio::write(*_client, boost::asio::buffer("fastcom_"+fastcom::FASTCOM_VERSION+"\n") );
+                        boost::asio::write(*_client, boost::asio::buffer(fastcom::FASTCOM_VERSION+"\n") );
                         
                         // Receive hash code of class.
                         size_t hashCodeRequest = retreiveHashCode(_client);
@@ -61,8 +61,9 @@ namespace fastcom{
 
                             // Send response
                             const char * responsePtr = reinterpret_cast<const char*>(&response);
-                            boost::asio::write(*_client, boost::asio::buffer(responsePtr, sizeof(ResponseType_)) );
-
+                            auto len = boost::asio::write(*_client, boost::asio::buffer(responsePtr, sizeof(ResponseType_)) );
+                            std::cout << "sent: " << len << " bytes\n";
+                            std::cout << int(responsePtr[0]) << int(responsePtr[1]) << int(responsePtr[2]) << int(responsePtr[3]) <<std::endl;
                             // Wait to finish
                             boost::asio::streambuf sb;
                             boost::asio::read_until(*_client, sb, "\n");

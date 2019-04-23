@@ -41,9 +41,9 @@ namespace fastcom{
         std::string fastcomVersion = boost::asio::buffer_cast<const char*>(buf.data());
         
         ResponseType_ response;
-        if(fastcomVersion == ("fastcom_"+fastcom::FASTCOM_VERSION+"\n")){
+        if(fastcomVersion == (fastcom::FASTCOM_VERSION+"\n")){
             // Sending hash code of request
-            size_t hashCode = typeid(_req).hash_code();
+            size_t hashCode = _req.type();
             const char * hashCodePtr = reinterpret_cast<const char*>(&hashCode);
             boost::asio::write( socket, boost::asio::buffer(hashCodePtr, sizeof(size_t)) );
 
@@ -56,8 +56,10 @@ namespace fastcom{
                 const char * requestPtr = reinterpret_cast<const char*>(&_req);
                 boost::asio::write( socket, boost::asio::buffer(requestPtr, sizeof(RequestType_)) );
 
+                // Get response
                 response = receiveType<ResponseType_>(&socket);
 
+                // Send end
                 boost::asio::write(socket, boost::asio::buffer("end\n") );
 
             }else{

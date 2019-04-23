@@ -28,32 +28,30 @@ struct RequestInt{
     int a;
 };
 
-struct RequestInt2{
-    SERVICE_MESSAGE_TYPE
-    int a;
-};
-
-
 struct ResponseInt{
     SERVICE_MESSAGE_TYPE
     int a;
 };
 
 int main(void){
-
+    ResponseInt res;
+    std::cout << res.type() << std::endl;
     fastcom::ServiceServer<RequestInt, ResponseInt> server(9999, [&](RequestInt &_req, ResponseInt &_res){
             std::cout <<"Received call: " << _req.a <<std::endl;
             _res.a = _req.a+1;
     });
 
-    fastcom::ServiceClient<RequestInt2, ResponseInt> client("0.0.0.0", 9999);
+    while(true){
 
-    std::cout << "sending calls" << std::endl;
-    RequestInt2 req;
-    for( unsigned i = 0; i < 10;i++){
-        req.a = i*4;
-        client.call(req);
     }
+    // fastcom::ServiceClient<RequestInt, ResponseInt> client("0.0.0.0", 9999);
 
-    std::cout << "Finished calls" << std::endl;
+    // std::cout << "sending calls" << std::endl;
+    // RequestInt req;
+    // for( unsigned i = 0; i < 10;i++){
+    //     req.a = i*4;
+    //     client.call(req);
+    // }
+
+    // std::cout << "Finished calls" << std::endl;
 }
