@@ -21,9 +21,10 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-import fastcom.ServiceClient
+import fastcom.ServiceServer
 import struct
 import ctypes
+import time 
 import sys
 
 class RequestInt:
@@ -43,10 +44,11 @@ class ResponseInt:
     def size(self):
         return ctypes.sizeof(ctypes.c_int)
 
-client = fastcom.ServiceClient.ServiceClient(sys.argv[1], int(sys.argv[2]))
+def serverCallback(_req, _res):
+    _res.a = _req.a
+    return True
 
-req = RequestInt()
-res = ResponseInt()
+server = fastcom.ServiceServer.ServiceServer(int(sys.argv[1]), serverCallback)
 
-client.call(req, res)
-print(res.a)
+while True:
+    time.sleep(1)

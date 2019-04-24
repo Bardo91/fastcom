@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 ##---------------------------------------------------------------------------------------------------------------------
 ##  FASTCOM
 ##---------------------------------------------------------------------------------------------------------------------
@@ -22,3 +24,89 @@
 import socket
 import sys
 import threading
+import fastcom.fastcom_version
+import struct
+import ctypes
+
+""" Subscriber class.
+This class that receives data from publishers
+"""
+class ServiceServer:
+    """ Basic initializer
+    """
+    def __init__(self, _port, _callback):
+        self.port_ = _port
+        self.acceptingConnections_ = True
+        self.threadVector = []
+        self.acceptThread = threading.Thread(target = self.__acceptThread)
+        self.acceptThread.start()
+
+    def __threadFunction(self, _conn):
+        print("started fun")
+        # Send boost version to check compatibility.
+        _conn.send(fastcom.fastcom_version.FASTCOM_VERSION+"\n")
+        
+        # Receive hash code of class.
+        hashcodeData = self.__receiveBytes(_conn, 4)
+        hashcode = struct.unpack("Q", hashcodeData)
+        print("received hash")
+        if(hashcode == 0):
+            # Good request type, send query for data.
+            _conn.send("good_request\n")
+            print("good request")
+
+            # Get request data
+            # request = receiveType<RequestType_>(_client);
+
+            # process response
+            # ResponseType_ response;
+            # callback_(request, response);
+
+            # Send response
+            # const char * responsePtr = reinterpret_cast<const char*>(&response);
+            # auto len = boost::asio::write(*_client, boost::asio::buffer(responsePtr, sizeof(ResponseType_)) );
+            # std::cout << "sent: " << len << " bytes\n";
+            # std::cout << int(responsePtr[0]) << int(responsePtr[1]) << int(responsePtr[2]) << int(responsePtr[3]) <<std::endl;
+            # Wait to finish
+            # boost::asio::streambuf sb;
+            # boost::asio::read_until(*_client, sb, "\n");
+            # std::string finalAnswer = boost::asio::buffer_cast<const char*>(sb.data());
+        else:
+            # Bad request type, send error msg.
+            print("\033[1;31m [ERROR]    Hash code of request is not the same than the expected. \033[0m\n");
+            _conn.send("bad_request_type\n")
+        
+        _conn.close()
+
+    def __acceptThread(self):
+        self.serverSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.serverSock.bind(("0.0.0.0", self.port_))
+        self.serverSock.listen()
+        while self.acceptingConnections_:
+            conn, addr = self.serverSock.accept()
+
+            thread = threading.Thread(target = self.__threadFunction, args=(conn))
+            thread.start()
+
+            self.threadVector.extend(thread)
+        
+
+    def __receiveUntil(self, _socket, _endChar):
+        hasFinished = False
+        string = ""
+        while not hasFinished:
+            chunk = _socket.recv(1)
+            if chunk == '\n':
+                hasFinished = True
+            else:
+                string = string+chunk
+        return string
+
+    def __receiveBytes(self, _socket, _bytes):
+        data = b''
+        total = 0
+        while total < _bytes:
+            chunk = _socket.recv(1)
+            data = data+chunk
+            total = total + len(chunk)
+            return data

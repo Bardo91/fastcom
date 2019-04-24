@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 ##---------------------------------------------------------------------------------------------------------------------
 ##  FASTCOM
 ##---------------------------------------------------------------------------------------------------------------------
@@ -22,7 +24,7 @@
 import socket
 import sys
 import threading
-import fastcom_version
+import fastcom.fastcom_version
 import struct
 import ctypes
 
@@ -60,7 +62,7 @@ class ServiceClient:
 
                 sock.send("end\n")
             else:
-                print("\033[1;31m [ERROR]    Hash code of request inconsistent with server version\033[0m\n");
+                print("\033[1;31m [ERROR]    Hash code of request inconsistent with server version\033[0m\n")
             
 
         else:
@@ -83,5 +85,5 @@ class ServiceClient:
         while total < _bytes:
             chunk = _socket.recv(1)
             data = data+chunk
-            total = total + len(chunk))
+            total = total + len(chunk)
         return data
