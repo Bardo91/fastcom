@@ -42,9 +42,9 @@ class ServiceServer:
         self.acceptThread.start()
 
     def __threadFunction(self, _conn):
-        print("started fun")
         # Send boost version to check compatibility.
-        _conn.send(fastcom.fastcom_version.FASTCOM_VERSION+"\n")
+        _conn.send(fastcom.fastcom_version.FASTCOM_VERSION)
+        _conn.send("\n")
         
         # Receive hash code of class.
         hashcodeData = self.__receiveBytes(_conn, 4)
@@ -85,10 +85,9 @@ class ServiceServer:
         while self.acceptingConnections_:
             conn, addr = self.serverSock.accept()
 
-            thread = threading.Thread(target = self.__threadFunction, args=(conn))
+            thread = threading.Thread(target = self.__threadFunction, args=(conn,))
             thread.start()
-
-            self.threadVector.extend(thread)
+            thread.join()   # 666 make it asyncronous
         
 
     def __receiveUntil(self, _socket, _endChar):
