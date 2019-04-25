@@ -32,7 +32,7 @@ class RequestInt:
         return struct.pack("i", self.a)
 
     def size(self):
-        return ctypes.sizeof(ctypes.c_int)
+        return struct.calcsize("i")
 
 
 class ResponseInt:
@@ -41,7 +41,7 @@ class ResponseInt:
         self.a = struct.unpack("i", data)
     
     def size(self):
-        return ctypes.sizeof(ctypes.c_int)
+        return struct.calcsize("i")
 
 client = fastcom.ServiceClient.ServiceClient(sys.argv[1], int(sys.argv[2]))
 
