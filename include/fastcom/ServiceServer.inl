@@ -62,8 +62,7 @@ namespace fastcom{
                             // Send response
                             const char * responsePtr = reinterpret_cast<const char*>(&response);
                             auto len = boost::asio::write(*_client, boost::asio::buffer(responsePtr, sizeof(ResponseType_)) );
-                            std::cout << "sent: " << len << " bytes\n";
-                            std::cout << int(responsePtr[0]) << int(responsePtr[1]) << int(responsePtr[2]) << int(responsePtr[3]) <<std::endl;
+
                             // Wait to finish
                             boost::asio::streambuf sb;
                             boost::asio::read_until(*_client, sb, "\n");
