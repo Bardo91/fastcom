@@ -24,7 +24,7 @@
 import socket
 import sys
 import threading
-import fastcom.fastcom_version
+import fastcom.fastcom_version as fastcom_version
 import struct
 import ctypes
 
@@ -60,7 +60,7 @@ class ServiceClient:
                 data = self.__receiveBytes(sock, 4)
                 _res.unpack(data)
 
-                sock.send("end\n")
+                sock.send(b"end\n")
             else:
                 print("\033[1;31m [ERROR]    Hash code of request inconsistent with server version\033[0m\n")
             
@@ -70,14 +70,14 @@ class ServiceClient:
 
     def __receiveUntil(self, _socket, _endChar):
         hasFinished = False
-        string = ""
+        chunks = []
         while not hasFinished:
             chunk = _socket.recv(1)
-            if chunk == '\n':
+            if chunk == b'\n':
                 hasFinished = True
             else:
-                string = string+chunk
-        return string
+                chunks.append(chunk)
+        return (b"".join(chunks)).decode("utf-8") 
 
     def __receiveBytes(self, _socket, _bytes):
         data = b''
