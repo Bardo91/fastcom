@@ -57,7 +57,7 @@ class ServiceClient:
                 sock.send(_req.pack())
 
                 #receiveResponse
-                data = self.__receiveBytes(sock, _req.size())
+                data = self.__receiveBytes(sock, _res.size())
                 _res.unpack(data)
 
                 sock.send(b"end\n")
