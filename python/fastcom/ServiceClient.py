@@ -57,7 +57,7 @@ class ServiceClient:
                 sock.send(_req.pack())
 
                 #receiveResponse
-                data = self.__receiveBytes(sock, 4)
+                data = self.__receiveBytes(sock, _req.size())
                 _res.unpack(data)
 
                 sock.send(b"end\n")
@@ -80,10 +80,8 @@ class ServiceClient:
         return (b"".join(chunks)).decode("utf-8") 
 
     def __receiveBytes(self, _socket, _bytes):
-        data = b''
-        total = 0
-        while total < _bytes:
-            chunk = _socket.recv(1)
-            data = data+chunk
-            total = total + len(chunk)
-        return data
+        _socket.recv(1) # 666 Ignoring chunk that for some reason is affecting the python code and do not the c++ code
+        return _socket.recv(_bytes)
+
+
+
