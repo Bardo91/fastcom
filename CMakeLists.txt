@@ -19,7 +19,7 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "./include")
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC pthread)
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC pthread atomic)
 
 if(Boost_FOUND)
   target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
