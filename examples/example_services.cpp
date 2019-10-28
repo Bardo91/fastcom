@@ -41,17 +41,16 @@ int main(void){
             _res.a = _req.a+1;
     });
 
-    while(true){
 
+    fastcom::ServiceClient<RequestInt, ResponseInt> client("0.0.0.0", 9999);
+
+    std::cout << "sending calls" << std::endl;
+    RequestInt req;
+    for( unsigned i = 0; i < 10;i++){
+        req.a = i*4;
+        auto res = client.call(req);
+        std::cout << "Response: " << res.a << std::endl;
     }
-    // fastcom::ServiceClient<RequestInt, ResponseInt> client("0.0.0.0", 9999);
 
-    // std::cout << "sending calls" << std::endl;
-    // RequestInt req;
-    // for( unsigned i = 0; i < 10;i++){
-    //     req.a = i*4;
-    //     client.call(req);
-    // }
-
-    // std::cout << "Finished calls" << std::endl;
+    std::cout << "Finished calls" << std::endl;
 }
