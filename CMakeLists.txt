@@ -22,18 +22,34 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 PROJECT(fastcom VERSION 1.2.0)
 
+
+#########################################
+######			General config	   ######
+#########################################
+
+option(BUILD_EXAMPLES "Compile examples" ON)
+option(BUILD_TESTS "Prepare tests" OFF)
+
 if(UNIX)
 	add_definitions(-std=c++11 -pthread -lpthread)
 elseif(WIN32)
 	set(Boost_USE_STATIC_LIBS ON)
 endif()
 
+
+#########################################
+######			Dependencies       ######
+#########################################
 set(Boost_USE_MULTITHREAD ON)
 
 find_package(Boost REQUIRED COMPONENTS system thread regex)
 
 find_package(OpenCV)
 
+
+#########################################
+######			Library	   ######
+#########################################
 file(GLOB_RECURSE FASTCOM_HEADERS "./include/*.h" "./include/*.inl")
 file(GLOB_RECURSE FASTCOM_SOURCES "./src/*.cpp")
 
@@ -45,7 +61,11 @@ endif()
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
 
-target_include_directories(${PROJECT_NAME} PRIVATE "./include")
+target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
 if(UNIX)
 	target_link_libraries(${PROJECT_NAME} LINK_PUBLIC pthread atomic)
 elseif(WIN32)
@@ -86,8 +106,17 @@ endif(DOXYGEN_FOUND)
 #########################################
 ######			Examples	   ######
 #########################################
-add_subdirectory(examples)
+if(${BUILD_EXAMPLES})
+	add_subdirectory(examples)
+endif()
 
+#########################################
+######			Test				######
+#########################################
+if(${BUILD_TESTS})
+	enable_testing()
+	add_subdirectory(tests)
+endif()
 
 #########################################
 ######			INSTALL 		   ######
