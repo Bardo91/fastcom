@@ -3,7 +3,7 @@
 ##---------------------------------------------------------------------------------------------------------------------
 ##  FASTCOM
 ##---------------------------------------------------------------------------------------------------------------------
-##  Copyright 2018 - Pablo Ramon Soria (a.k.a. Bardo91) 
+##  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
 ##---------------------------------------------------------------------------------------------------------------------
 ##  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 ##  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -21,7 +21,7 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-FASTCOM_VERSION = "1.0.5.2"
+FASTCOM_VERSION = "1.2.0"
 FASTCOM_VERSION_MAJOR = "1"
-FASTCOM_VERSION_MINOR = "0"
-FASTCOM_VERSION_REVIEW = "5.2"
+FASTCOM_VERSION_MINOR = "2"
+FASTCOM_VERSION_REVIEW = "0"

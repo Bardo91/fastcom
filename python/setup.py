@@ -4,7 +4,7 @@ import sys,os
 
 setup_dict = dict(
 name='fastcom',
-version='1.0',
+version='1.2.0',
 description='Fast communication utils for python and c++',
 author='Pablo Ramon Soria',
 author_email='pabramsor@gmail.com',
