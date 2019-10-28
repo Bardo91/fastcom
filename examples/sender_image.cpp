@@ -25,6 +25,8 @@
 #include <iostream>
 #include <chrono>
 
+#ifdef FASTCOM_HAS_OPENCV
+
 struct SimpleFloat{
     float a;
 };
@@ -42,3 +44,10 @@ int main(int _argc, char** _argv){
     }
 
 }
+
+#else
+
+int main() {
+
+}
+#endif

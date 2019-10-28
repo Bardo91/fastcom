@@ -19,6 +19,9 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
+
+#ifdef FASTCOM_HAS_OPENCV
+
 #include <fastcom/ImageSubscriber.h>
 
 #include <thread>
@@ -41,3 +44,11 @@ int main(int _argc, char**_argv){
     }
 
 }
+
+#else
+
+int main() {
+
+}
+
+#endif

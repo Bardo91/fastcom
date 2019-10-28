@@ -24,11 +24,12 @@
 
 #include <fastcom/ImagePublisher.h>
 #include <fastcom/Subscriber.h>
+
+#ifdef FASTCOM_HAS_OPENCV
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
-
-#ifdef FASTCOM_HAS_OPENCV
 
 namespace fastcom{
     /// Subscriber specialized for image transmission
