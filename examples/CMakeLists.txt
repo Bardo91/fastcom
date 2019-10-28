@@ -41,6 +41,10 @@ target_include_directories(example_destruction PRIVATE "../include")
 target_link_libraries(example_destruction LINK_PUBLIC fastcom)
 
 
-add_executable(example_services "example_services.cpp")
-target_include_directories(example_services PRIVATE "../include")
-target_link_libraries(example_services LINK_PUBLIC fastcom)
+add_executable(example_service_client "service_client.cpp")
+target_include_directories(example_service_client PRIVATE "../include")
+target_link_libraries(example_service_client LINK_PUBLIC fastcom)
+
+add_executable(example_service_server "service_server.cpp")
+target_include_directories(example_service_server PRIVATE "../include")
+target_link_libraries(example_service_server LINK_PUBLIC fastcom)

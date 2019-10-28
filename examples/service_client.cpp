@@ -34,14 +34,6 @@ struct ResponseInt{
 };
 
 int main(void){
-    ResponseInt res;
-    std::cout << res.type() << std::endl;
-    fastcom::ServiceServer<RequestInt, ResponseInt> server(9999, [&](RequestInt &_req, ResponseInt &_res){
-            std::cout <<"Received call: " << _req.a <<std::endl;
-            _res.a = _req.a+1;
-    });
-
-
     fastcom::ServiceClient<RequestInt, ResponseInt> client("0.0.0.0", 9999);
 
     std::cout << "sending calls" << std::endl;

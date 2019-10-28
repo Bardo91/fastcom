@@ -49,7 +49,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE "./include")
 if(UNIX)
 	target_link_libraries(${PROJECT_NAME} LINK_PUBLIC pthread atomic)
 elseif(WIN32)
-	SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES CMAKE_CXX_FLAGS  "/EHsc")
+	target_compile_options(${PROJECT_NAME} PUBLIC "/EHsc")
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
