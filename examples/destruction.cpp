@@ -39,10 +39,10 @@ int main(){
 
     for(unsigned iter = 0; iter < 10; iter++){
 		publisher = new fastcom::Publisher<SimpleFloat>(8888);
-		subscriber = new fastcom::Subscriber<SimpleFloat>("0.0.0.0", 8888);
+		subscriber = new fastcom::Subscriber<SimpleFloat>("127.0.0.1", 8888);
 
 	    subscriber->attachCallback([&](SimpleFloat &_data){
-		std::cout << _data.a << std::endl;
+			std::cout << _data.a << std::endl;
 	    });
 
 		
@@ -50,9 +50,9 @@ int main(){
 	    SimpleFloat data;
 	    data.a = 0;
 	    for(int i = 1;i<10;i++){
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));   
-		publisher->publish(data);
-		data.a +=1;
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));   
+			publisher->publish(data);
+			data.a +=1;
 	    }
 
 	    delete publisher;

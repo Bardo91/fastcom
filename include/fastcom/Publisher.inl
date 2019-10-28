@@ -83,15 +83,17 @@ namespace fastcom {
 
     template<typename DataType_>
     Publisher<DataType_>::~Publisher(){
-	// Prevent publisher to keep working	
-	mRun = false;
-	// Unlock self socket
-	boost::array<char, 1> send_buf = { { 0 } };
-        auto selfEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string("0.0.0.0"), mPort);
-	if(mServerSocket){
-		mServerSocket->send_to(boost::asio::buffer(send_buf), selfEndpoint);
-	}
-	// Join thread
+		// Prevent publisher to keep working	
+		mRun = false;
+		// Unlock self socket
+		boost::array<char, 1> send_buf = { { 0 } };
+		auto selfEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), mPort);
+		
+		if(mServerSocket){
+			mServerSocket->send_to(boost::asio::buffer(send_buf), selfEndpoint);
+		}
+		
+		// Join thread
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         if(mListenThread.joinable()){
             mListenThread.join();
