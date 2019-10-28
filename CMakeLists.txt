@@ -64,7 +64,11 @@ endif(OpenCV_FOUND)
 
 # Find python latest version
 find_package (Python3 COMPONENTS Interpreter REQUIRED)
-set(PYTHON_BINARY python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})
+if(UNIX)
+	set(PYTHON_BINARY python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})
+elseif(WIN32)
+	set(PYTHON_BINARY python)
+endif()
 
 #########################################
 ######			Documentation	   ######
