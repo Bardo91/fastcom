@@ -83,11 +83,13 @@ endif(OpenCV_FOUND)
 
 
 # Find python latest version
-find_package (Python3 COMPONENTS Interpreter REQUIRED)
-if(UNIX)
-	set(PYTHON_BINARY python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})
-elseif(WIN32)
-	set(PYTHON_BINARY python)
+find_package (Python3)
+if(${Python3_FOUND})
+	if(UNIX)
+		set(PYTHON_BINARY python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})
+	elseif(WIN32)
+		set(PYTHON_BINARY python)
+	endif()
 endif()
 
 #########################################
@@ -123,10 +125,13 @@ endif()
 #########################################
 include(CMakePackageConfigHelpers)
 
-## INSTALLATION Python Library
-add_custom_target(  install_python 
-                    ${PYTHON_BINARY} ${CMAKE_CURRENT_SOURCE_DIR}/python/setup.py  install --user
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python )
+
+if(${Python3_FOUND})
+	## INSTALLATION Python Library
+	add_custom_target(  install_python 
+						${PYTHON_BINARY} ${CMAKE_CURRENT_SOURCE_DIR}/python/setup.py  install --user
+						WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python )
+endif()
 
 ## INSTALLATION C++ Library
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
