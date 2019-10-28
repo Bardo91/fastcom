@@ -23,9 +23,12 @@
 #define _FASTCOM_IMAGEPUBLISHER_H_
 
 #include <fastcom/Publisher.h>
+#ifdef FASTCOM_HAS_OPENCV
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#endif
+
 #include <chrono>
 
 #ifdef FASTCOM_HAS_OPENCV

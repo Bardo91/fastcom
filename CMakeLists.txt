@@ -1,36 +1,45 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 PROJECT(fastcom VERSION 1.0)
 
-add_definitions(-std=c++11 -pthread -lpthread)
+if(UNIX)
+	add_definitions(-std=c++11 -pthread -lpthread)
+elseif(WIN32)
+	set(Boost_USE_STATIC_LIBS ON)
+endif()
 
-set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREAD ON)
 
 find_package(Boost REQUIRED COMPONENTS system thread regex)
 
 find_package(OpenCV)
 
-
 file(GLOB_RECURSE FASTCOM_HEADERS "./include/*.h" "./include/*.inl")
 file(GLOB_RECURSE FASTCOM_SOURCES "./src/*.cpp")
 
-add_library(${PROJECT_NAME} SHARED ${FASTCOM_SOURCES} ${FASTCOM_HEADERS})
+if(UNIX)
+	add_library(${PROJECT_NAME} SHARED ${FASTCOM_SOURCES} ${FASTCOM_HEADERS})
+elseif(WIN32)
+	add_library(${PROJECT_NAME} STATIC ${FASTCOM_SOURCES} ${FASTCOM_HEADERS})
+endif()
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "./include")
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC pthread)
+if(UNIX)
+	target_link_libraries(${PROJECT_NAME} LINK_PUBLIC pthread atomic)
+elseif(WIN32)
+	SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES CMAKE_CXX_FLAGS  "/EHsc")
+endif()
 
-if(Boost_FOUND)
-  target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
-  target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_REGEX_LIBRARY})
-ENDIF(Boost_FOUND)
+target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${Boost_LIBRARIES})
 
 if(OpenCV_FOUND)
   target_include_directories(${PROJECT_NAME} PUBLIC ${OpenCV_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${OpenCV_LIBRARIES})
   target_compile_definitions(${PROJECT_NAME} PUBLIC FASTCOM_HAS_OPENCV)
 endif(OpenCV_FOUND)
+
 
 # Find python latest version
 find_package (Python3 COMPONENTS Interpreter REQUIRED)

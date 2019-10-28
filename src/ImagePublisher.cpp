@@ -31,7 +31,7 @@ namespace fastcom{
 
     void ImagePublisher::publish(cv::Mat &_image, int _compression){
         std::vector<int> params;
-        params.push_back(CV_IMWRITE_JPEG_QUALITY);
+        params.push_back( cv::IMWRITE_JPEG_QUALITY);
         params.push_back(30); //image quality
         std::vector<uchar> buffer;
 
