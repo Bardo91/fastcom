@@ -19,23 +19,28 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-import time
-import struct
-import sys
-# internal trick by now....
-for idx, dir in enumerate(sys.path):
-    if "ros" in dir:
-        sys.path[idx] = "/home/bardo91/.local/lib/python3.5/site-packages"
+add_executable(example_sender "sender.cpp")
+target_include_directories(example_sender PRIVATE "../include")
+target_link_libraries(example_sender LINK_PUBLIC fastcom)
+
+add_executable(example_receiver "receiver.cpp")
+target_include_directories(example_receiver PRIVATE "../include")
+target_link_libraries(example_receiver LINK_PUBLIC fastcom)
 
 
+add_executable(example_sender_image "sender_image.cpp")
+target_include_directories(example_sender_image PRIVATE "../include")
+target_link_libraries(example_sender_image LINK_PUBLIC fastcom)
 
-import fastcom.ImagePublisher
-import cv2
+add_executable(example_receiver_image "receiver_image.cpp")
+target_include_directories(example_receiver_image PRIVATE "../include")
+target_link_libraries(example_receiver_image LINK_PUBLIC fastcom)
 
-pub = fastcom.ImagePublisher.ImagePublisher(8888)
+add_executable(example_destruction "destruction.cpp")
+target_include_directories(example_destruction PRIVATE "../include")
+target_link_libraries(example_destruction LINK_PUBLIC fastcom)
 
-camera = cv2.VideoCapture(0)
-while True:
-    ret, frame = camera.read()
-    pub.publish(frame, 10)
-    print("sending")
+
+add_executable(example_services "example_services.cpp")
+target_include_directories(example_services PRIVATE "../include")
+target_link_libraries(example_services LINK_PUBLIC fastcom)

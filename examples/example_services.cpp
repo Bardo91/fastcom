@@ -19,25 +19,38 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/ImageSubscriber.h>
 
-#include <thread>
-#include <iostream>
-#include <chrono>
+#include <fastcom/ServiceServer.h>
+#include <fastcom/ServiceClient.h>
 
-int main(int _argc, char**_argv){
+struct RequestInt{
+    SERVICE_MESSAGE_TYPE
+    int a;
+};
 
-    fastcom::ImageSubscriber subscriber(_argv[1], 8888);
+struct ResponseInt{
+    SERVICE_MESSAGE_TYPE
+    int a;
+};
 
-    std::function<void(cv::Mat &)> callback = [&](cv::Mat &_data){
-        cv::imshow("display", _data);
-        cv::waitKey(3);
-    };
+int main(void){
+    ResponseInt res;
+    std::cout << res.type() << std::endl;
+    fastcom::ServiceServer<RequestInt, ResponseInt> server(9999, [&](RequestInt &_req, ResponseInt &_res){
+            std::cout <<"Received call: " << _req.a <<std::endl;
+            _res.a = _req.a+1;
+    });
 
-    subscriber.attachCallback(callback);
 
-    for(;;){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));   
+    fastcom::ServiceClient<RequestInt, ResponseInt> client("0.0.0.0", 9999);
+
+    std::cout << "sending calls" << std::endl;
+    RequestInt req;
+    for( unsigned i = 0; i < 10;i++){
+        req.a = i*4;
+        auto res = client.call(req);
+        std::cout << "Response: " << res.a << std::endl;
     }
 
+    std::cout << "Finished calls" << std::endl;
 }

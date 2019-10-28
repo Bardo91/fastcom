@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2018 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 

@@ -1,7 +1,7 @@
 get_filename_component(fastcom_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(CMakeFindDependencyMacro)
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV)
 
 if(NOT TARGET fastcom::fastcom)
     include("${fastcom_CMAKE_DIR}/fastcomTargets.cmake")

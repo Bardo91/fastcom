@@ -19,25 +19,32 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/ImageSubscriber.h>
+#ifndef _FASTCOM_SERVICECLIENT_H_
+#define _FASTCOM_SERVICECLIENT_H_
 
+#include <boost/asio.hpp>
 #include <thread>
-#include <iostream>
-#include <chrono>
 
-int main(int _argc, char**_argv){
+namespace fastcom{
+    template<typename RequestType_, typename ResponseType_>
+    class ServiceClient{
+    public:
+        ServiceClient(std::string _ip, int _port);
+        ResponseType_ call(RequestType_ &_req);
 
-    fastcom::ImageSubscriber subscriber(_argv[1], 8888);
+    private:
+        template<typename T_>
+        T_ receiveType(boost::asio::ip::tcp::socket *_socket);
 
-    std::function<void(cv::Mat &)> callback = [&](cv::Mat &_data){
-        cv::imshow("display", _data);
-        cv::waitKey(3);
+    private:
+        boost::asio::io_service ioService_;
+
+        std::string ip_;
+        int port_;
+
     };
-
-    subscriber.attachCallback(callback);
-
-    for(;;){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));   
-    }
-
 }
+
+#include <fastcom/ServiceClient.inl>
+
+#endif

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 ##---------------------------------------------------------------------------------------------------------------------
 ##  FASTCOM
 ##---------------------------------------------------------------------------------------------------------------------
@@ -19,23 +21,32 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-import time
+import fastcom.ServiceClient
 import struct
+import ctypes
 import sys
-# internal trick by now....
-for idx, dir in enumerate(sys.path):
-    if "ros" in dir:
-        sys.path[idx] = "/home/bardo91/.local/lib/python3.5/site-packages"
+
+class RequestInt:
+    a = 1
+    def pack(self):
+        return struct.pack("i", self.a)
+
+    def size(self):
+        return struct.calcsize("i")
 
 
+class ResponseInt:
+    a = 1
+    def unpack(self, data):
+        self.a = struct.unpack("i", data)
+    
+    def size(self):
+        return struct.calcsize("i")
 
-import fastcom.ImagePublisher
-import cv2
+client = fastcom.ServiceClient.ServiceClient(sys.argv[1], int(sys.argv[2]))
 
-pub = fastcom.ImagePublisher.ImagePublisher(8888)
+req = RequestInt()
+res = ResponseInt()
 
-camera = cv2.VideoCapture(0)
-while True:
-    ret, frame = camera.read()
-    pub.publish(frame, 10)
-    print("sending")
+client.call(req, res)
+print(res.a)

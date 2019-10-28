@@ -1,5 +1,26 @@
+##---------------------------------------------------------------------------------------------------------------------
+##  FASTCOM
+##---------------------------------------------------------------------------------------------------------------------
+##  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+##---------------------------------------------------------------------------------------------------------------------
+##  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+##  and associated documentation files (the "Software"), to deal in the Software without restriction, 
+##  including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+##  sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+##  furnished to do so, subject to the following conditions:
+##
+##  The above copyright notice and this permission notice shall be included in all copies or substantial 
+##  portions of the Software.
+##
+##  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
+##  BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+##  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES 
+##  OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+##---------------------------------------------------------------------------------------------------------------------
+
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
-PROJECT(fastcom VERSION 1.0)
+PROJECT(fastcom VERSION 1.2.0)
 
 if(UNIX)
 	add_definitions(-std=c++11 -pthread -lpthread)
@@ -42,7 +63,7 @@ endif(OpenCV_FOUND)
 
 
 # Find python latest version
-find_package (Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package (Python3 COMPONENTS Interpreter REQUIRED)
 set(PYTHON_BINARY python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})
 
 #########################################
@@ -61,27 +82,7 @@ endif(DOXYGEN_FOUND)
 #########################################
 ######			Examples	   ######
 #########################################
-
-add_executable(example_sender "examples/sender.cpp")
-target_include_directories(example_sender PRIVATE "./include")
-target_link_libraries(example_sender LINK_PUBLIC fastcom)
-
-add_executable(example_receiver "examples/receiver.cpp")
-target_include_directories(example_receiver PRIVATE "./include")
-target_link_libraries(example_receiver LINK_PUBLIC fastcom)
-
-
-add_executable(example_sender_image "examples/sender_image.cpp")
-target_include_directories(example_sender_image PRIVATE "./include")
-target_link_libraries(example_sender_image LINK_PUBLIC fastcom)
-
-add_executable(example_receiver_image "examples/receiver_image.cpp")
-target_include_directories(example_receiver_image PRIVATE "./include")
-target_link_libraries(example_receiver_image LINK_PUBLIC fastcom)
-
-add_executable(example_destruction "examples/destruction.cpp")
-target_include_directories(example_destruction PRIVATE "./include")
-target_link_libraries(example_destruction LINK_PUBLIC fastcom)
+add_subdirectory(examples)
 
 
 #########################################

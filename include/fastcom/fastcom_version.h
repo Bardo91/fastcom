@@ -19,25 +19,17 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/ImageSubscriber.h>
 
-#include <thread>
-#include <iostream>
-#include <chrono>
+#ifndef FASTCOM_FASTCOMVERSION_H_
+#define FASTCOM_FASTCOMVERSION_H_
 
-int main(int _argc, char**_argv){
+#include <string>
 
-    fastcom::ImageSubscriber subscriber(_argv[1], 8888);
-
-    std::function<void(cv::Mat &)> callback = [&](cv::Mat &_data){
-        cv::imshow("display", _data);
-        cv::waitKey(3);
-    };
-
-    subscriber.attachCallback(callback);
-
-    for(;;){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));   
-    }
-
+namespace fastcom{
+    static const std::string FASTCOM_VERSION = "1.0.5.2";
+    static const std::string FASTCOM_VERSION_MAJOR = "1";
+    static const std::string FASTCOM_VERSION_MINOR = "0";
+    static const std::string FASTCOM_VERSION_REVIEW = "5.2";
 }
+
+#endif

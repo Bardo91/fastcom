@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 ##---------------------------------------------------------------------------------------------------------------------
 ##  FASTCOM
 ##---------------------------------------------------------------------------------------------------------------------
@@ -19,23 +21,7 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-import time
-import struct
-import sys
-# internal trick by now....
-for idx, dir in enumerate(sys.path):
-    if "ros" in dir:
-        sys.path[idx] = "/home/bardo91/.local/lib/python3.5/site-packages"
-
-
-
-import fastcom.ImagePublisher
-import cv2
-
-pub = fastcom.ImagePublisher.ImagePublisher(8888)
-
-camera = cv2.VideoCapture(0)
-while True:
-    ret, frame = camera.read()
-    pub.publish(frame, 10)
-    print("sending")
+FASTCOM_VERSION = "1.2.0"
+FASTCOM_VERSION_MAJOR = "1"
+FASTCOM_VERSION_MINOR = "2"
+FASTCOM_VERSION_REVIEW = "0"

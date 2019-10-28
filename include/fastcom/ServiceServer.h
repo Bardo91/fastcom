@@ -19,25 +19,53 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/ImageSubscriber.h>
+#ifndef _FASTCOM_SERVICESERVER_H_
+#define _FASTCOM_SERVICESERVER_H_
 
+#include <boost/asio.hpp>
+#include<functional>
 #include <thread>
-#include <iostream>
-#include <chrono>
 
-int main(int _argc, char**_argv){
+namespace fastcom{
+    #define SERVICE_MESSAGE_TYPE \
+    public: \
+	bool checkType(size_t _hash){ \
+		return this->type() == _hash; \
+	} \
+	size_t type(){ \
+		return 0; \
+	}
 
-    fastcom::ImageSubscriber subscriber(_argv[1], 8888);
+    /// Service Server class
+    template<typename RequestType_, typename ResponseType_>
+    class ServiceServer{
+    public:
+        /// Basic constructor. Uses given port to accept connections
+        /// \param _port: port to accept connections
+        ServiceServer(int _port, std::function<void (RequestType_ &, ResponseType_ &)> _callback);
 
-    std::function<void(cv::Mat &)> callback = [&](cv::Mat &_data){
-        cv::imshow("display", _data);
-        cv::waitKey(3);
+        /// Basic destructor. Stop and disable the server.
+        ~ServiceServer();
+
+    private:
+        size_t retreiveHashCode(boost::asio::ip::tcp::socket *_client);
+        
+        template<typename T_>
+        T_ receiveType(boost::asio::ip::tcp::socket *_client);
+
+    private:
+        int port_;
+
+        boost::asio::io_service ioService_;
+        boost::asio::ip::tcp::acceptor serverSocket_;
+
+        bool acceptingConnections_;
+        std::thread acceptingThread_;
+
+        std::function<void (RequestType_ &, ResponseType_ &)> callback_;
     };
-
-    subscriber.attachCallback(callback);
-
-    for(;;){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));   
-    }
-
 }
+
+#include <fastcom/ServiceServer.inl>
+
+#endif
