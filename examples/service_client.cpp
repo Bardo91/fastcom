@@ -33,14 +33,16 @@ struct ResponseInt{
     int a;
 };
 
-int main(void){
-    fastcom::ServiceClient<RequestInt, ResponseInt> client("0.0.0.0", 9999);
+int main(int _argc, char** _argv) {
+
+    fastcom::ServiceClient<RequestInt, ResponseInt> client(_argv[1], 9999);
 
     std::cout << "sending calls" << std::endl;
     RequestInt req;
     for( unsigned i = 0; i < 10;i++){
         req.a = i*4;
         auto res = client.call(req);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
         std::cout << "Response: " << res.a << std::endl;
     }
 
