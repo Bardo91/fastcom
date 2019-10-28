@@ -84,6 +84,7 @@ namespace fastcom{
 		                        }
 		                        mCallbackGuard.unlock();
 				}catch(std::exception &e ){
+					std::cerr << e.what() << std::endl;
 					mRun = false;
 				}
                             }
