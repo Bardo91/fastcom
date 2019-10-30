@@ -19,29 +19,31 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/Subscriber.h>
+#include <fastcom/fastcom.h>
 
 #include <thread>
 #include <iostream>
 #include <chrono>
 
 
-struct SimpleFloat{
-    float a;
-    float b;
-    float c;
-};
 
 int main(int _argc, char **_argv){
 
-    fastcom::Subscriber<SimpleFloat> subscriber(_argv[1], 8888);
-
-    subscriber.attachCallback([&](SimpleFloat &_data){
-        std::cout << _data.a << std::endl;
+    fastcom::Publisher<int> publisher(8888);
+    fastcom::Subscriber<int> subscriber("127.0.0.1", 8888);
+    while(!subscriber.isConnected()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));   
+    }
+ 
+    int expectedValue = 1;
+    subscriber.attachCallback([&](int &_data){
+        std::cout << _data << "/" << expectedValue << std::endl;
+        expectedValue++;
     });
 
-    for(;;){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));   
+    for(int msg = 1; msg < 10; msg++){
+        publisher.publish(msg);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));   
 }

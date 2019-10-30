@@ -56,8 +56,9 @@ namespace fastcom {
 			}
 			else {
 				// Send confirmation
-				boost::array<char, 1> send_buf = { { 0 } };
-				mServerSocket->send_to(boost::asio::buffer(send_buf), *remote_endpoint);
+				// boost::array<char, 1> send_buf = { { 0 } };
+				// mServerSocket->send_to(boost::asio::buffer(send_buf), *remote_endpoint);
+				
 				// std::cout << "Received new connection from " << remote_endpoint->address().to_string() << std::endl;
 				mSafeGuard.lock();
 				bool addCon = true;

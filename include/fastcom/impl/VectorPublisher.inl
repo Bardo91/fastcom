@@ -46,15 +46,12 @@ namespace fastcom{
                 }
             }
 
-            for(unsigned i = 0; i < nPackets; i++){
-                boost::array<char, sizeof(int)> send_buffer;
-                memcpy(&send_buffer[0], &_data[i], sizeof(int));
-                try {
-                    mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
-                }
-                catch (std::exception &e) {
-                    std::cerr << e.what() << std::endl;
-                }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            try {
+                mServerSocket->send_to(boost::asio::buffer(_data), *con, 0, ignored_error);
+            }
+            catch (std::exception &e) {
+                std::cerr << e.what() << std::endl;
             }
         }
         mSafeGuard.unlock();

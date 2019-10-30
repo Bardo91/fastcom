@@ -34,22 +34,16 @@ namespace fastcom{
                 {
                     boost::array<char, sizeof(int)> recv_buf;
                     size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-                    assert(len == sizeof(int));
+                    // assert(len == sizeof(int));
                     memcpy(&nPackets, &recv_buf[0], sizeof(int));
                 }
 
+
+                std::vector<int> vectorPackets(nPackets);
+                size_t len = mSocket->receive_from(boost::asio::buffer(vectorPackets), sender_endpoint);
+                // assert(len == sizeof(int)*nPackets);
+
                 mLastStamp = std::chrono::system_clock::now();
-
-                std::vector<int> vectorPackets;
-                for(unsigned i = 0; i < nPackets ; i++){
-                    boost::array<char, sizeof(int)> recv_buf;
-                    size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-                    assert(len == sizeof(int));
-                    int packet;
-                    memcpy(&packet, &recv_buf[0], sizeof(int));
-                    vectorPackets.push_back(packet);
-                }   
-
                 mCallbackGuard.lock();
                 for(auto &callback: mCallbacks){
                     callback(vectorPackets);

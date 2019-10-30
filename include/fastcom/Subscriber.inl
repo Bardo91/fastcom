@@ -40,37 +40,37 @@ namespace fastcom{
         // std::cout << "Trying to connect to " + std::to_string(_port) << std::endl;
         mConnectionThread = std::thread([&](){
             try {	
-				for(;;){
+				// for(;;){
                     // Send query to publisher
                     boost::array<char, 1> send_buf = { { 0 } };
                     mSocket->send_to(boost::asio::buffer(send_buf), mEndpoint);
                     
                     // Set timeout
-                    mDeadlineTimout.expires_from_now(boost::posix_time::milliseconds(200));
+                    // mDeadlineTimout.expires_from_now(boost::posix_time::milliseconds(200));
 
                     // Wait for response
-                    boost::system::error_code ec = boost::asio::error::would_block;
-                    std::size_t length = 0;
+                    // boost::system::error_code ec = boost::asio::error::would_block;
+                    // std::size_t length = 0;
 
-					boost::array<char, 1> recv_buf;
-					mSocket->async_receive_from( boost::asio::buffer(recv_buf), 
-                                                    mEndpoint, 
-                                                    boost::bind(
-                                                            &Subscriber<DataType_>::asyncConnectionHandle, this,
-                                                            boost::asio::placeholders::error,
-                                                            boost::asio::placeholders::bytes_transferred)
-                                                    );
+					// boost::array<char, 1> recv_buf;
+					// mSocket->async_receive_from( boost::asio::buffer(recv_buf), 
+                    //                                 mEndpoint, 
+                    //                                 boost::bind(
+                    //                                         &Subscriber<DataType_>::asyncConnectionHandle, this,
+                    //                                         boost::asio::placeholders::error,
+                    //                                         boost::asio::placeholders::bytes_transferred)
+                    //                                 );
 
-					io_service.run_one();					
-                    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+					// io_service.run_one();					
+                    // std::this_thread::sleep_for(std::chrono::milliseconds(300));
                     
-                    if(mReceivedConnectionNotification){
+                    // if(mReceivedConnectionNotification){
                         mRun = true;
-                        mListenThread = std::thread(&Subscriber<DataType_>::listenCallback, this);
-                        break;
-                    }
-				io_service.reset();
-			}
+                        mListenThread = std::thread(&Subscriber<DataType_>::listenCallback, this);  // 666 this will cause other problems...
+                    //     break;
+                    // }
+				// io_service.reset();
+			    // }
 		}catch (std::exception &e) {
 			std::cerr << e.what() << std::endl;
 		}
@@ -78,7 +78,7 @@ namespace fastcom{
         });
 
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));   // To make sure that the port is ready
+        // std::this_thread::sleep_for(std::chrono::milliseconds(300));   // To make sure that the port is ready
         
         mLastStamp = std::chrono::system_clock::now();
     }
@@ -147,17 +147,18 @@ namespace fastcom{
             boost::asio::ip::udp::endpoint sender_endpoint;
             try{
                 size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-                
-                mLastStamp = std::chrono::system_clock::now();
+                if(len == sizeof(DataType_)){
+                    mLastStamp = std::chrono::system_clock::now();
 
-                DataType_ packet;
-                memcpy(&packet, &recv_buf[0], sizeof(DataType_));
+                    DataType_ packet;
+                    memcpy(&packet, &recv_buf[0], sizeof(DataType_));
 
-                mCallbackGuard.lock();
-                for(auto &callback: mCallbacks){
-                    callback(packet);
+                    mCallbackGuard.lock();
+                    for(auto &callback: mCallbacks){
+                        callback(packet);
+                    }
+                    mCallbackGuard.unlock();
                 }
-                mCallbackGuard.unlock();
             }catch(std::exception &e ){
                 mRun = false;
             }

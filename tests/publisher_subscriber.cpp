@@ -31,6 +31,9 @@ TEST(IntTest, IntTest)  {
 
     fastcom::Publisher<int> publisher(8888);
     fastcom::Subscriber<int> subscriber("127.0.0.1", 8888);
+    while(!subscriber.isConnected()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));   
+    }
  
     int expectedValue = 1;
     subscriber.attachCallback([&](int &_data){
@@ -38,7 +41,7 @@ TEST(IntTest, IntTest)  {
         expectedValue++;
     });
 
-    for(int msg = expectedValue; msg < 10; msg++){
+    for(int msg = 1; msg < 10; msg++){
         publisher.publish(msg);
     }
 
@@ -50,6 +53,9 @@ TEST(FloatTest, FloatTest)  {
 
     fastcom::Publisher<float> publisher(8888);
     fastcom::Subscriber<float> subscriber("127.0.0.1", 8888);
+    while(!subscriber.isConnected()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));   
+    }
  
     float expectedValue = 1.0f;
     subscriber.attachCallback([&](float &_data){
@@ -57,7 +63,7 @@ TEST(FloatTest, FloatTest)  {
         expectedValue += 1.0f;
     });
 
-    for(int msg = expectedValue; msg < 10; msg = msg+1.0f){
+    for(int msg = 1; msg < 10; msg = msg+1.0f){
         publisher.publish(msg);
     }
 
@@ -68,6 +74,9 @@ TEST(FloatTest, FloatTest)  {
 TEST(StringTest, StringTest)  {
     fastcom::Publisher<std::string> publisher(8888);
     fastcom::Subscriber<std::string> subscriber("127.0.0.1", 8888);
+    while(!subscriber.isConnected()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));   
+    }
  
     std::string expectedValue = "WORKING";
     subscriber.attachCallback([&](std::string &_data){
@@ -80,23 +89,25 @@ TEST(StringTest, StringTest)  {
 }
 
 
-// TEST(VectorTest, VectorTest)  {
-//     fastcom::Publisher<std::vector<int>> publisher(8888);
-//     fastcom::Subscriber<std::vector<int>> subscriber("127.0.0.1", 8888);
+TEST(VectorTest, VectorTest)  {
+    fastcom::Publisher<std::vector<int>> publisher(8888);
+    fastcom::Subscriber<std::vector<int>> subscriber("127.0.0.1", 8888);
+    while(!subscriber.isConnected()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));   
+    }
  
-//     std::vector<int> expectedValue = {1,2,3,4};
-//     subscriber.attachCallback([&](std::vector<int> &_data){
-//         std::cout <<_data[3] << std::endl;
-//         ASSERT_EQ(1, _data[0]);
-//         ASSERT_EQ(2, _data[1]);
-//         ASSERT_EQ(3, _data[2]);
-//         ASSERT_EQ(5, _data[3]);
-//     });
+    std::vector<int> expectedValue = {1,2,3,4};
+    subscriber.attachCallback([&](std::vector<int> &_data){
+        ASSERT_EQ(1, _data[0]);
+        ASSERT_EQ(2, _data[1]);
+        ASSERT_EQ(3, _data[2]);
+        ASSERT_EQ(4, _data[3]);
+    });
 
-//     publisher.publish(expectedValue);
+    publisher.publish(expectedValue);
 
-//     std::this_thread::sleep_for(std::chrono::milliseconds(10000));   
-// }
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));   
+}
  
 int main(int _argc, char **_argv)  {
     testing::InitGoogleTest(&_argc, _argv);

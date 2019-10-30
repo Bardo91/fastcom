@@ -56,5 +56,6 @@ namespace fastcom{
 
 // Specializations
 #include <fastcom/impl/StringPublisher.inl>
+#include <fastcom/impl/VectorPublisher.inl>
 
 #endif
