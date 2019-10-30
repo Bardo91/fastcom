@@ -78,6 +78,25 @@ TEST(StringTest, StringTest)  {
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));   
 }
+
+
+// TEST(VectorTest, VectorTest)  {
+//     fastcom::Publisher<std::vector<int>> publisher(8888);
+//     fastcom::Subscriber<std::vector<int>> subscriber("127.0.0.1", 8888);
+ 
+//     std::vector<int> expectedValue = {1,2,3,4};
+//     subscriber.attachCallback([&](std::vector<int> &_data){
+//         std::cout <<_data[3] << std::endl;
+//         ASSERT_EQ(1, _data[0]);
+//         ASSERT_EQ(2, _data[1]);
+//         ASSERT_EQ(3, _data[2]);
+//         ASSERT_EQ(5, _data[3]);
+//     });
+
+//     publisher.publish(expectedValue);
+
+//     std::this_thread::sleep_for(std::chrono::milliseconds(10000));   
+// }
  
 int main(int _argc, char **_argv)  {
     testing::InitGoogleTest(&_argc, _argv);
