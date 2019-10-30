@@ -1,3 +1,4 @@
+
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
@@ -19,42 +20,33 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_PUBLISHER_H_
-#define _FASTCOM_PUBLISHER_H_
-
-#include <boost/asio.hpp>
-#include <thread>
-#include <mutex>
-
+#include <string>
 
 namespace fastcom{
-    /// Class that broadcast information.
-    template<typename DataType_>
-    class Publisher{
-        public:
-            /// Basic constructor. It binds to an specific port and sends information to subscriber
-            /// \param _port: ports to be binded.
-            Publisher(int _port);
+    
+    #undef MAX_STRING_SIZE
+    #define MAX_STRING_SIZE 30
 
-            /// Basic desconstructor.
-            ~Publisher();
+    template<>
+    void Publisher<std::string>::publish(const std::string &_data){
+    if(mRun && mServerSocket){
+        mSafeGuard.lock();
+        for (auto &con : mUdpConnections) {
+            boost::system::error_code error;
+            boost::system::error_code ignored_error;
 
-            /// Publish information to the subscribers
-            /// \param _data: data to be published.
-            void publish(const DataType_ &_data);
-        private:
-            int mPort;
-            std::vector<boost::asio::ip::udp::endpoint*> mUdpConnections;
-            boost::asio::ip::udp::socket *mServerSocket;
-			std::thread mListenThread;
-			bool mRun = false;
-			std::mutex mSafeGuard;
-    };
+            assert(_data.size() < MAX_STRING_SIZE);
+
+            boost::array<char, MAX_STRING_SIZE> send_buffer;
+            memcpy(&send_buffer[0], &_data, MAX_STRING_SIZE);
+            try {
+                mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
+            }
+            catch (std::exception &e) {
+                std::cerr << e.what() << std::endl;
+            }
+        }
+        mSafeGuard.unlock();
+        }    
+    }
 }
-
-#include <fastcom/Publisher.inl>
-
-// Specializations
-#include <fastcom/impl/StringPublisher.inl>
-
-#endif

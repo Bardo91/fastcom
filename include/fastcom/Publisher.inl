@@ -101,7 +101,7 @@ namespace fastcom {
     }
     //-----------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
-    void Publisher<DataType_>::publish(DataType_ &_data){
+    void Publisher<DataType_>::publish(const DataType_ &_data){
     if(mRun && mServerSocket){
 	     mSafeGuard.lock();
 		for (auto &con : mUdpConnections) {

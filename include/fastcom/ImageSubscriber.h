@@ -23,7 +23,6 @@
 #define _FASTCOM_IMAGESUBSCRIBER_H_
 
 #include <fastcom/ImagePublisher.h>
-#include <fastcom/Subscriber.h>
 
 #ifdef FASTCOM_HAS_OPENCV
 
@@ -32,6 +31,9 @@
 #include <opencv2/highgui.hpp>
 
 namespace fastcom{
+    template<typename T_>
+    class Subscriber;
+
     /// Subscriber specialized for image transmission
     class ImageSubscriber {
         public:

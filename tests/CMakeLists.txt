@@ -19,7 +19,16 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-include(cmake/AddGoogleTest.cmake)
+cmake_minimum_required(VERSION 3.12)
+ 
+### Add test with input file
+add_executable(publisher_subscriber publisher_subscriber.cpp)
+target_link_libraries(publisher_subscriber LINK_PRIVATE fastcom)
+target_include_directories(publisher_subscriber PRIVATE "../include")
+target_link_libraries(publisher_subscriber LINK_PRIVATE gtest gtest_main)
+add_test(test_publisher_subscriber publisher_subscriber)
+
+
 
 ### Add test destruction
 add_executable(test_destruction test_destruction.cpp)

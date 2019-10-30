@@ -19,42 +19,48 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_PUBLISHER_H_
-#define _FASTCOM_PUBLISHER_H_
+#include <fastcom/fastcom.h>
 
-#include <boost/asio.hpp>
+#include <gtest/gtest.h>
+
+#include <atomic>
 #include <thread>
-#include <mutex>
+#include <chrono>
 
-
-namespace fastcom{
-    /// Class that broadcast information.
-    template<typename DataType_>
-    class Publisher{
-        public:
-            /// Basic constructor. It binds to an specific port and sends information to subscriber
-            /// \param _port: ports to be binded.
-            Publisher(int _port);
-
-            /// Basic desconstructor.
-            ~Publisher();
-
-            /// Publish information to the subscribers
-            /// \param _data: data to be published.
-            void publish(const DataType_ &_data);
-        private:
-            int mPort;
-            std::vector<boost::asio::ip::udp::endpoint*> mUdpConnections;
-            boost::asio::ip::udp::socket *mServerSocket;
-			std::thread mListenThread;
-			bool mRun = false;
-			std::mutex mSafeGuard;
+TEST(FloatTest, FloatTest)  {
+    struct floatStruct{
+        float data;
     };
+
+    fastcom::Publisher<floatStruct> publisher(8888);
+    fastcom::Subscriber<floatStruct> subscriber("127.0.0.1", 8888);
+
+    std::atomic<bool> flagRecv(false); 
+    float expectedValue = 1.61803398875f;
+    subscriber.attachCallback([&](floatStruct &_data){
+        std::cout << _data.data << std::endl;
+        ASSERT_EQ(_data.data, expectedValue);
+        flagRecv = true;
+    });
+
+    floatStruct msg;
+    msg.data = expectedValue;
+        std::cout <<
+        "----" << msg.data << std::endl;
+    publisher.publish(msg);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));   
+    ASSERT_TRUE(flagRecv);
+
+    // ASSERT_EQ(-1.0, squareRoot(-15.0));
+    // ASSERT_EQ(-1.0, squareRoot(-0.2));
 }
 
-#include <fastcom/Publisher.inl>
+TEST(StringTest, StringTest)  {
 
-// Specializations
-#include <fastcom/impl/StringPublisher.inl>
-
-#endif
+}
+ 
+int main(int _argc, char **_argv)  {
+    testing::InitGoogleTest(&_argc, _argv);
+    return RUN_ALL_TESTS();
+}

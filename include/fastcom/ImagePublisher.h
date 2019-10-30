@@ -22,7 +22,6 @@
 #ifndef _FASTCOM_IMAGEPUBLISHER_H_
 #define _FASTCOM_IMAGEPUBLISHER_H_
 
-#include <fastcom/Publisher.h>
 #ifdef FASTCOM_HAS_OPENCV
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
@@ -34,6 +33,9 @@
 #ifdef FASTCOM_HAS_OPENCV
 
 namespace fastcom{
+    template<typename T_>
+    class Publisher;
+
     /// Maximum packet size used to send images
     static const int IMAGE_PACKET_SIZE = 1024;
 
