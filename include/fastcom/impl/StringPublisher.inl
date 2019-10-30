@@ -38,7 +38,7 @@ namespace fastcom{
             assert(_data.size() < MAX_STRING_SIZE);
 
             boost::array<char, MAX_STRING_SIZE> send_buffer;
-            memcpy(&send_buffer[0], &_data, MAX_STRING_SIZE);
+            memcpy(&send_buffer[0], _data.c_str(), MAX_STRING_SIZE);
             try {
                 mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
             }

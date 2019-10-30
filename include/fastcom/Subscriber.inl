@@ -76,6 +76,9 @@ namespace fastcom{
 		}
 		// std::cout << "Closing reading of new connections" << std::endl;
         });
+
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));   // To make sure that the port is ready
         
         mLastStamp = std::chrono::system_clock::now();
     }

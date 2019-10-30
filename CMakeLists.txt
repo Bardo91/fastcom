@@ -115,16 +115,6 @@ endif()
 #########################################
 ######			Test				######
 #########################################
-if(${BUILD_TESTS})
-	enable_testing()
-	add_subdirectory(tests)
-endif()
-
-find_package(GTest)
-if(${GTest_FOUND})
-  enable_testing()
-  add_subdirectory(tests)
-endif()
 
 find_package(GTest)
 if(${GTest_FOUND})
