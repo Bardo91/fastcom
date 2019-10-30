@@ -20,6 +20,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 #include <fastcom/ImageSubscriber.h>
+#include <fastcom/Subscriber.h>
 
 #ifdef FASTCOM_HAS_OPENCV
 

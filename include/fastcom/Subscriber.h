@@ -44,7 +44,6 @@ namespace fastcom{
             /// Destructor
             ~Subscriber();
 
-            
             /// Attach a callback to a subscription. Each time data arrives the attached callback are called
             void attachCallback(std::function<void(DataType_ &)> _callback);
 
@@ -52,6 +51,8 @@ namespace fastcom{
             void asyncConnectionHandle(const boost::system::error_code &error, std::size_t length);
             bool mReceivedConnectionNotification = false;
             void checkDeadline();
+
+            void listenCallback();
 
         private:
             boost::asio::ip::udp::endpoint mEndpoint;
@@ -71,5 +72,9 @@ namespace fastcom{
 }
 
 #include <fastcom/Subscriber.inl>
+
+// Specializations
+#include <fastcom/impl/StringSubscriber.inl>
+
 
 #endif

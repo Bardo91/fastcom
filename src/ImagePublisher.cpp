@@ -20,7 +20,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 #include <fastcom/ImagePublisher.h>
-
+#include <fastcom/Publisher.h>
 
 #ifdef FASTCOM_HAS_OPENCV
 

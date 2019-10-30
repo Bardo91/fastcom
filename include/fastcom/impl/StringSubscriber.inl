@@ -1,3 +1,4 @@
+
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
@@ -19,42 +20,37 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_PUBLISHER_H_
-#define _FASTCOM_PUBLISHER_H_
 
-#include <boost/asio.hpp>
-#include <thread>
-#include <mutex>
-
+#include <string>
 
 namespace fastcom{
-    /// Class that broadcast information.
-    template<typename DataType_>
-    class Publisher{
-        public:
-            /// Basic constructor. It binds to an specific port and sends information to subscriber
-            /// \param _port: ports to be binded.
-            Publisher(int _port);
 
-            /// Basic desconstructor.
-            ~Publisher();
+    #undef MAX_STRING_SIZE
+    #define MAX_STRING_SIZE 30
 
-            /// Publish information to the subscribers
-            /// \param _data: data to be published.
-            void publish(const DataType_ &_data);
-        private:
-            int mPort;
-            std::vector<boost::asio::ip::udp::endpoint*> mUdpConnections;
-            boost::asio::ip::udp::socket *mServerSocket;
-			std::thread mListenThread;
-			bool mRun = false;
-			std::mutex mSafeGuard;
-    };
+    template<>
+    void Subscriber<std::string>::listenCallback(){
+        while(mRun){
+            boost::array<char, MAX_STRING_SIZE> recv_buf;
+            boost::asio::ip::udp::endpoint sender_endpoint;
+            try{
+                size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+                
+                mLastStamp = std::chrono::system_clock::now();
+
+                char packetBuf[MAX_STRING_SIZE];
+                memcpy(&packetBuf, &recv_buf[0], MAX_STRING_SIZE);
+
+                std::string packet(packetBuf);
+
+                mCallbackGuard.lock();
+                for(auto &callback: mCallbacks){
+                    callback(packet);
+                }
+                mCallbackGuard.unlock();
+            }catch(std::exception &e ){
+                mRun = false;
+            }
+        }
+    }
 }
-
-#include <fastcom/Publisher.inl>
-
-// Specializations
-#include <fastcom/impl/StringPublisher.inl>
-
-#endif
