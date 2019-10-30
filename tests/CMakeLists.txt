@@ -29,9 +29,8 @@ target_link_libraries(publisher_subscriber LINK_PRIVATE gtest gtest_main)
 add_test(test_publisher_subscriber publisher_subscriber)
 
 
-
 ### Add test destruction
 add_executable(test_destruction test_destruction.cpp)
 target_link_libraries(test_destruction LINK_PUBLIC gtest gtest_main)
-target_link_libraries(test_destruction LINK_PUBLIC fastcom)
 add_test(test_destruction test_destruction)
+target_link_libraries(test_destruction LINK_PUBLIC fastcom)

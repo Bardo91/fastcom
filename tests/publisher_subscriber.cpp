@@ -27,37 +27,56 @@
 #include <thread>
 #include <chrono>
 
-TEST(FloatTest, FloatTest)  {
-    struct floatStruct{
-        float data;
-    };
+TEST(IntTest, IntTest)  {
 
-    fastcom::Publisher<floatStruct> publisher(8888);
-    fastcom::Subscriber<floatStruct> subscriber("127.0.0.1", 8888);
-
-    std::atomic<bool> flagRecv(false); 
-    float expectedValue = 1.61803398875f;
-    subscriber.attachCallback([&](floatStruct &_data){
-        std::cout << _data.data << std::endl;
-        ASSERT_EQ(_data.data, expectedValue);
-        flagRecv = true;
+    fastcom::Publisher<int> publisher(8888);
+    fastcom::Subscriber<int> subscriber("127.0.0.1", 8888);
+ 
+    int expectedValue = 1;
+    subscriber.attachCallback([&](int &_data){
+        ASSERT_EQ(_data, expectedValue);
+        expectedValue++;
     });
 
-    floatStruct msg;
-    msg.data = expectedValue;
-        std::cout <<
-        "----" << msg.data << std::endl;
-    publisher.publish(msg);
+    for(int msg = expectedValue; msg < 10; msg++){
+        publisher.publish(msg);
+    }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));   
-    ASSERT_TRUE(flagRecv);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));   
 
-    // ASSERT_EQ(-1.0, squareRoot(-15.0));
-    // ASSERT_EQ(-1.0, squareRoot(-0.2));
+}
+
+TEST(FloatTest, FloatTest)  {
+
+    fastcom::Publisher<float> publisher(8888);
+    fastcom::Subscriber<float> subscriber("127.0.0.1", 8888);
+ 
+    float expectedValue = 1.0f;
+    subscriber.attachCallback([&](float &_data){
+        ASSERT_EQ(_data, expectedValue);
+        expectedValue += 1.0f;
+    });
+
+    for(int msg = expectedValue; msg < 10; msg = msg+1.0f){
+        publisher.publish(msg);
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));   
+
 }
 
 TEST(StringTest, StringTest)  {
+    fastcom::Publisher<std::string> publisher(8888);
+    fastcom::Subscriber<std::string> subscriber("127.0.0.1", 8888);
+ 
+    std::string expectedValue = "WORKING";
+    subscriber.attachCallback([&](std::string &_data){
+        ASSERT_STREQ("WORKING", _data.c_str());
+    });
 
+    publisher.publish(expectedValue);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));   
 }
  
 int main(int _argc, char **_argv)  {
