@@ -24,6 +24,8 @@
 
 #include <fastcom/ImagePublisher.h>
 
+#include <functional>
+
 #ifdef FASTCOM_HAS_OPENCV
 
 #include <opencv2/core.hpp>
