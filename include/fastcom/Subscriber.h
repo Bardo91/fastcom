@@ -27,7 +27,7 @@
 #include <mutex>
 #include <boost/asio/deadline_timer.hpp>
 
-
+#include <fastcom/macros.h>
 
 namespace fastcom{
     /// Class to subscribe to information. 
@@ -57,9 +57,10 @@ namespace fastcom{
             void checkDeadline();
 
             void listenCallback();
-            // void listenCallback(const std::vector<DataType_> &_dummy);  // Cant specialize for a partial specialized type vector. 
-            //                                                             // So overloading method instead of specializing http://www.gotw.ca/publications/mill17.htm
-
+            
+            typename std::enable_if<!is_vector<DataType_>{}, DataType_>::type listenCallback_impl();
+            // typename std::enable_if<is_vector<DataType_>{}, DataType_>::type  listenCallback_impl();
+            
         private:
             boost::asio::ip::udp::endpoint mEndpoint;
             boost::asio::ip::udp::socket *mSocket;

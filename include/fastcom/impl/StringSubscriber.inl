@@ -25,32 +25,21 @@
 
 namespace fastcom{
 
-    #undef MAX_STRING_SIZE
-    #define MAX_STRING_SIZE 30
-
     template<>
-    void Subscriber<std::string>::listenCallback(){
-        while(mRun){
-            boost::array<char, MAX_STRING_SIZE> recv_buf;
-            boost::asio::ip::udp::endpoint sender_endpoint;
-            try{
-                size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-                
-                mLastStamp = std::chrono::system_clock::now();
+    typename std::enable_if<!is_vector<std::string>{}, std::string>::type 
+    Subscriber<std::string>::listenCallback_impl(){
+        boost::array<char, MAX_STRING_SIZE> recv_buf;
+        boost::asio::ip::udp::endpoint sender_endpoint;
+        size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+        
+        mLastStamp = std::chrono::system_clock::now();
 
-                char packetBuf[MAX_STRING_SIZE];
-                memcpy(&packetBuf, &recv_buf[0], MAX_STRING_SIZE);
+        char packetBuf[MAX_STRING_SIZE];
+        memcpy(&packetBuf, &recv_buf[0], MAX_STRING_SIZE);
 
-                std::string packet(packetBuf);
-
-                mCallbackGuard.lock();
-                for(auto &callback: mCallbacks){
-                    callback(packet);
-                }
-                mCallbackGuard.unlock();
-            }catch(std::exception &e ){
-                mRun = false;
-            }
-        }
+        std::string packet(packetBuf);
+        
+        return packet;
     }
+
 }

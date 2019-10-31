@@ -23,10 +23,6 @@
 #include <string>
 
 namespace fastcom{
-    
-    #undef MAX_STRING_SIZE
-    #define MAX_STRING_SIZE 30
-
     template<>
     void Publisher<std::string>::publish(const std::string &_data){
     if(mRun && mServerSocket){

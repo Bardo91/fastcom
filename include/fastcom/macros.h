@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#define MAX_STRING_SIZE 30
+
 // Helper structures to differentiate normal implementation with vector implementation
 template<typename T> 
 struct is_vector : public std::false_type {};

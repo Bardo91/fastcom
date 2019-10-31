@@ -144,26 +144,42 @@ namespace fastcom{
     template<typename DataType_>
     void Subscriber<DataType_>::listenCallback(){
         while(mRun){
-            boost::array<char, sizeof(DataType_)> recv_buf;
-            boost::asio::ip::udp::endpoint sender_endpoint;
             try{
-                size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-                if(len == sizeof(DataType_)){
-                    mLastStamp = std::chrono::system_clock::now();
+                DataType_ packet = listenCallback_impl();
+                
+                mLastStamp = std::chrono::system_clock::now();
 
-                    DataType_ packet;
-                    memcpy(&packet, &recv_buf[0], sizeof(DataType_));
-
-                    mCallbackGuard.lock();
-                    for(auto &callback: mCallbacks){
-                        callback(packet);
-                    }
-                    mCallbackGuard.unlock();
+                mCallbackGuard.lock();
+                for(auto &callback: mCallbacks){
+                    callback(packet);
                 }
+                mCallbackGuard.unlock();
+            
             }catch(std::exception &e ){
                 mRun = false;
             }
         }
+    }
+
+
+
+    //---------------------------------------------------------------------------------------------------------------------
+    template<typename DataType_>
+    typename std::enable_if<!is_vector<DataType_>{}, DataType_>::type 
+    Subscriber<DataType_>::listenCallback_impl(){
+        boost::array<char, sizeof(DataType_)> recv_buf;
+        boost::asio::ip::udp::endpoint sender_endpoint;
+
+        size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+        if(len == sizeof(DataType_)){
+            mLastStamp = std::chrono::system_clock::now();
+
+            DataType_ packet;
+            memcpy(&packet, &recv_buf[0], sizeof(DataType_));
+
+            return packet;
+        }
+    
     }
 
 }

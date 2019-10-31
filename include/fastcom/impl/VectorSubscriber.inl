@@ -25,33 +25,25 @@
 
 namespace fastcom{
     
-    template<>
-    void Subscriber<std::vector<int>>::listenCallback(){
-        while(mRun){
-            boost::asio::ip::udp::endpoint sender_endpoint;
-            try{
-                int nPackets = -1;
-                {
-                    boost::array<char, sizeof(int)> recv_buf;
-                    size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-                    // assert(len == sizeof(int));
-                    memcpy(&nPackets, &recv_buf[0], sizeof(int));
-                }
+    
+    // template<typename DataType_>
+    // typename std::enable_if<is_vector<DataType_>{}, DataType_>::type 
+    // Subscriber<DataType_>::listenCallback_impl(){
+    //         boost::asio::ip::udp::endpoint sender_endpoint;
+        
+    //         int nPackets = -1;
+    //         {
+    //             boost::array<char, sizeof(int)> recv_buf;
+    //             size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+    //             // assert(len == sizeof(int));
+    //             memcpy(&nPackets, &recv_buf[0], sizeof(int));
+    //         }
 
 
-                std::vector<int> vectorPackets(nPackets);
-                size_t len = mSocket->receive_from(boost::asio::buffer(vectorPackets), sender_endpoint);
-                // assert(len == sizeof(int)*nPackets);
+    //         DataType_ vectorPackets(nPackets);
+    //         size_t len = mSocket->receive_from(boost::asio::buffer(vectorPackets), sender_endpoint);
+    //         // assert(len == sizeof(int)*nPackets);
 
-                mLastStamp = std::chrono::system_clock::now();
-                mCallbackGuard.lock();
-                for(auto &callback: mCallbacks){
-                    callback(vectorPackets);
-                }
-                mCallbackGuard.unlock();
-            }catch(std::exception &e ){
-                mRun = false;
-            }
-        }
-    }
+    //         return vectorPackets;
+    // }
 }
