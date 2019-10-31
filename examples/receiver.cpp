@@ -61,23 +61,23 @@ int main(int _argc, char **_argv){
     std::this_thread::sleep_for(std::chrono::milliseconds(100));     
 
 
-    // fastcom::Publisher<std::vector<int>> publisher(8888);
-    // fastcom::Subscriber<std::vector<int>> subscriber("127.0.0.1", 8888);
-    // while(!subscriber.isConnected()){
-    //     std::this_thread::sleep_for(std::chrono::milliseconds(30));   
-    // }
+    fastcom::Publisher<std::vector<int>> publisher(8888);
+    fastcom::Subscriber<std::vector<int>> subscriber("127.0.0.1", 8888);
+    while(!subscriber.isConnected()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));   
+    }
  
-    // std::vector<int> expectedValue = {1,2,3,4};
-    // subscriber.attachCallback([&](std::vector<int> &_data){
-    //     std::cout<<_data[0] << std::endl;
-    //     std::cout<<_data[1] << std::endl;
-    //     std::cout<<_data[2] << std::endl;
-    //     std::cout<<_data[3] << std::endl;
-    // });
+    std::vector<int> expectedValue = {1,2,3,4};
+    subscriber.attachCallback([&](std::vector<int> &_data){
+        std::cout<<_data[0] << std::endl;
+        std::cout<<_data[1] << std::endl;
+        std::cout<<_data[2] << std::endl;
+        std::cout<<_data[3] << std::endl;
+    });
 
-    // publisher.publish(expectedValue);
+    publisher.publish(expectedValue);
 
-    // std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
     
 
 }

@@ -26,8 +26,8 @@
 namespace fastcom{
 
     template<>
-    typename std::enable_if<!is_vector<std::string>{}, std::string>::type 
-    Subscriber<std::string>::listenCallback_impl(){
+    template<>
+    bool Subscriber<std::string>::listenCallback_impl(std::string &_packet){
         boost::array<char, MAX_STRING_SIZE> recv_buf;
         boost::asio::ip::udp::endpoint sender_endpoint;
         size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
@@ -39,7 +39,8 @@ namespace fastcom{
 
         std::string packet(packetBuf);
         
-        return packet;
+        _packet = packet;
+        return true;
     }
 
 }

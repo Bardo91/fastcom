@@ -145,16 +145,16 @@ namespace fastcom{
     void Subscriber<DataType_>::listenCallback(){
         while(mRun){
             try{
-                DataType_ packet = listenCallback_impl();
-                
-                mLastStamp = std::chrono::system_clock::now();
+                DataType_ packet;
+                if(listenCallback_impl(packet)){
+                    mLastStamp = std::chrono::system_clock::now();
 
-                mCallbackGuard.lock();
-                for(auto &callback: mCallbacks){
-                    callback(packet);
+                    mCallbackGuard.lock();
+                    for(auto &callback: mCallbacks){
+                        callback(packet);
+                    }
+                    mCallbackGuard.unlock();
                 }
-                mCallbackGuard.unlock();
-            
             }catch(std::exception &e ){
                 mRun = false;
             }
@@ -165,8 +165,8 @@ namespace fastcom{
 
     //---------------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
-    typename std::enable_if<!is_vector<DataType_>{}, DataType_>::type 
-    Subscriber<DataType_>::listenCallback_impl(){
+	template<typename T_, class>
+    bool Subscriber<DataType_>::listenCallback_impl(DataType_ &_packet){
         boost::array<char, sizeof(DataType_)> recv_buf;
         boost::asio::ip::udp::endpoint sender_endpoint;
 
@@ -177,9 +177,10 @@ namespace fastcom{
             DataType_ packet;
             memcpy(&packet, &recv_buf[0], sizeof(DataType_));
 
-            return packet;
+            _packet = packet;
+            return true;
         }
-    
+        return false;
     }
 
 }

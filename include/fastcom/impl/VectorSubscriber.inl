@@ -25,25 +25,27 @@
 
 namespace fastcom{
     
-    
-    // template<typename DataType_>
-    // typename std::enable_if<is_vector<DataType_>{}, DataType_>::type 
-    // Subscriber<DataType_>::listenCallback_impl(){
-    //         boost::asio::ip::udp::endpoint sender_endpoint;
+    template<typename DataType_>
+	template<typename T_, class>
+    bool Subscriber<DataType_>::listenCallback_impl(T_ &_packet){
+            boost::asio::ip::udp::endpoint sender_endpoint;
+            
+            int nPackets = -1;
+            
+            boost::array<char, sizeof(int)> recv_buf;
+            size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+            if(len != sizeof(int)){
+                return false;
+            }
+            memcpy(&nPackets, &recv_buf[0], sizeof(int));
         
-    //         int nPackets = -1;
-    //         {
-    //             boost::array<char, sizeof(int)> recv_buf;
-    //             size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-    //             // assert(len == sizeof(int));
-    //             memcpy(&nPackets, &recv_buf[0], sizeof(int));
-    //         }
+            T_ vectorPackets(nPackets);
+            len = mSocket->receive_from(boost::asio::buffer(vectorPackets), sender_endpoint);
+            if(len != sizeof(int)*nPackets){
+                return false;
+            }
 
-
-    //         DataType_ vectorPackets(nPackets);
-    //         size_t len = mSocket->receive_from(boost::asio::buffer(vectorPackets), sender_endpoint);
-    //         // assert(len == sizeof(int)*nPackets);
-
-    //         return vectorPackets;
-    // }
+            _packet = vectorPackets;
+            return true;
+    }
 }

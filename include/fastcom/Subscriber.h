@@ -58,8 +58,12 @@ namespace fastcom{
 
             void listenCallback();
             
-            typename std::enable_if<!is_vector<DataType_>{}, DataType_>::type listenCallback_impl();
-            // typename std::enable_if<is_vector<DataType_>{}, DataType_>::type  listenCallback_impl();
+
+            template<typename T_ = DataType_, class = typename std::enable_if<!is_vector<T_>{}, T_>::type>
+            bool listenCallback_impl(DataType_ &_data);
+
+            template<typename T_ = DataType_, class = typename std::enable_if<is_vector<T_>{}, T_>::type>
+            bool listenCallback_impl(T_ &_data);
             
         private:
             boost::asio::ip::udp::endpoint mEndpoint;
