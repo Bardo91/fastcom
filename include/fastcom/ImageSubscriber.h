@@ -25,6 +25,8 @@
 #include <fastcom/ImagePublisher.h>
 
 #include <functional>
+#include <mutex>
+#include <thread>
 
 #ifdef FASTCOM_HAS_OPENCV
 
