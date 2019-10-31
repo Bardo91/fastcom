@@ -25,24 +25,36 @@
 namespace fastcom{
     template<>
     void Publisher<std::string>::publish(const std::string &_data){
-    if(mRun && mServerSocket){
-        mSafeGuard.lock();
-        for (auto &con : mUdpConnections) {
-            boost::system::error_code error;
-            boost::system::error_code ignored_error;
+        if(mRun && mServerSocket){
+            mSafeGuard.lock();
+            for (auto &con : mUdpConnections) {
+                boost::system::error_code error;
+                boost::system::error_code ignored_error;
 
-            assert(_data.size() < MAX_STRING_SIZE);
+                int nPackets = _data.size();
+                // std::vectors have a more complex structure. It is dangeorous because packets may get lost! 666
+                // Send Number of packets
+                {
+                    boost::array<char, sizeof(int)> send_buffer;
+                    memcpy(&send_buffer[0], &nPackets, sizeof(int));
+                    try {
+                        mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
+                    }
+                    catch (std::exception &e) {
+                        std::cerr << e.what() << std::endl;
+                    }
+                }
 
-            boost::array<char, MAX_STRING_SIZE> send_buffer;
-            memcpy(&send_buffer[0], _data.c_str(), MAX_STRING_SIZE);
-            try {
-                mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::vector<char> stdBuffer(_data.begin(), _data.end());
+                try {
+                    mServerSocket->send_to(boost::asio::buffer(stdBuffer), *con, 0, ignored_error);
+                }
+                catch (std::exception &e) {
+                    std::cerr << e.what() << std::endl;
+                }
             }
-            catch (std::exception &e) {
-                std::cerr << e.what() << std::endl;
-            }
-        }
-        mSafeGuard.unlock();
+            mSafeGuard.unlock();
         }    
     }
 }

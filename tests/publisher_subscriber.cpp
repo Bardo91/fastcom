@@ -51,8 +51,8 @@ TEST(IntTest, IntTest)  {
 
 TEST(FloatTest, FloatTest)  {
 
-    fastcom::Publisher<float> publisher(8888);
-    fastcom::Subscriber<float> subscriber("127.0.0.1", 8888);
+    fastcom::Publisher<float> publisher(8886);
+    fastcom::Subscriber<float> subscriber("127.0.0.1", 8886);
     while(!subscriber.isConnected()){
         std::this_thread::sleep_for(std::chrono::milliseconds(30));   
     }
@@ -72,20 +72,21 @@ TEST(FloatTest, FloatTest)  {
 }
 
 TEST(StringTest, StringTest)  {
-    fastcom::Publisher<std::string> publisher(8888);
-    fastcom::Subscriber<std::string> subscriber("127.0.0.1", 8888);
+
+    fastcom::Publisher<std::string> publisher(8887);
+    fastcom::Subscriber<std::string> subscriber("127.0.0.1", 8887);
     while(!subscriber.isConnected()){
         std::this_thread::sleep_for(std::chrono::milliseconds(30));   
     }
  
     std::string expectedValue = "YEAH BITCH";
     subscriber.attachCallback([&](std::string &_data){
-        ASSERT_STREQ(expectedValue.c_str(), _data.c_str());
+        ASSERT_STREQ(_data.c_str(), expectedValue.c_str());
     });
 
     publisher.publish(expectedValue);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));   
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));      
 }
 
 

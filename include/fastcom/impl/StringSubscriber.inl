@@ -28,18 +28,24 @@ namespace fastcom{
     template<>
     template<>
     bool Subscriber<std::string>::listenCallback_impl(std::string &_packet){
-        boost::array<char, MAX_STRING_SIZE> recv_buf;
         boost::asio::ip::udp::endpoint sender_endpoint;
+        
+        int nPackets = -1;
+        
+        boost::array<char, sizeof(int)> recv_buf;
         size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-        
-        mLastStamp = std::chrono::system_clock::now();
+        if(len != sizeof(int)){
+            return false;
+        }
+        memcpy(&nPackets, &recv_buf[0], sizeof(int));
+    
+        std::vector<char> stdBuffer(nPackets);
+        len = mSocket->receive_from(boost::asio::buffer(stdBuffer), sender_endpoint);
+        if(len != nPackets){
+            return false;
+        }
 
-        char packetBuf[MAX_STRING_SIZE];
-        memcpy(&packetBuf, &recv_buf[0], MAX_STRING_SIZE);
-
-        std::string packet(packetBuf);
-        
-        _packet = packet;
+        _packet = std::string(stdBuffer.begin(), stdBuffer.end());
         return true;
     }
 
