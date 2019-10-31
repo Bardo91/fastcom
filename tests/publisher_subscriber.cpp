@@ -78,9 +78,9 @@ TEST(StringTest, StringTest)  {
         std::this_thread::sleep_for(std::chrono::milliseconds(30));   
     }
  
-    std::string expectedValue = "WORKING";
+    std::string expectedValue = "YEAH BITCH";
     subscriber.attachCallback([&](std::string &_data){
-        ASSERT_STREQ("WORKING", _data.c_str());
+        ASSERT_STREQ(expectedValue.c_str(), _data.c_str());
     });
 
     publisher.publish(expectedValue);
