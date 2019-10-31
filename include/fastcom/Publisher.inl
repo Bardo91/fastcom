@@ -103,22 +103,29 @@ namespace fastcom {
     //-----------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
     void Publisher<DataType_>::publish(const DataType_ &_data){
-    if(mRun && mServerSocket){
-	     mSafeGuard.lock();
-		for (auto &con : mUdpConnections) {
-			boost::system::error_code error;
-			boost::system::error_code ignored_error;
+		publish_impl(_data);
+    }
 
-			boost::array<char, sizeof(DataType_)> send_buffer;
-			memcpy(&send_buffer[0], &_data, sizeof(DataType_));
-			try {
-				mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
+	//-----------------------------------------------------------------------------------------------------------------
+    template<typename DataType_>
+	template<typename T_, class>
+    void Publisher<DataType_>::publish_impl(const DataType_ &_data){
+    	if(mRun && mServerSocket){
+			mSafeGuard.lock();
+			for (auto &con : mUdpConnections) {
+				boost::system::error_code error;
+				boost::system::error_code ignored_error;
+
+				boost::array<char, sizeof(DataType_)> send_buffer;
+				memcpy(&send_buffer[0], &_data, sizeof(DataType_));
+				try {
+					mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
+				}
+				catch (std::exception &e) {
+					std::cerr << e.what() << std::endl;
+				}
 			}
-			catch (std::exception &e) {
-				std::cerr << e.what() << std::endl;
-			}
-		}
-	    mSafeGuard.unlock();
+			mSafeGuard.unlock();
         }    
     }
 } 

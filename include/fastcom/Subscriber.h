@@ -57,6 +57,8 @@ namespace fastcom{
             void checkDeadline();
 
             void listenCallback();
+            // void listenCallback(const std::vector<DataType_> &_dummy);  // Cant specialize for a partial specialized type vector. 
+            //                                                             // So overloading method instead of specializing http://www.gotw.ca/publications/mill17.htm
 
         private:
             boost::asio::ip::udp::endpoint mEndpoint;

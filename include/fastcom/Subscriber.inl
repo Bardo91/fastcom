@@ -25,6 +25,7 @@
 #include <boost/bind.hpp>
 #include <iostream>
 
+
 namespace fastcom{
     //---------------------------------------------------------------------------------------------------------------------
     template<typename DataType_>

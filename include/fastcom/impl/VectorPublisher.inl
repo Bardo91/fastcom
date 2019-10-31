@@ -23,38 +23,38 @@
 #include <vector>
 
 namespace fastcom{
+    template<typename DataType_>
+    template<typename T_, class>
+    void Publisher<DataType_>::publish_impl(const T_ &_data){
+        if(mRun && mServerSocket){
+            mSafeGuard.lock();
+            for (auto &con : mUdpConnections) {
+                boost::system::error_code error;
+                boost::system::error_code ignored_error;
 
-    template<>
-    void Publisher<std::vector<int>>::publish(const std::vector<int> &_data){
-    if(mRun && mServerSocket){
-        mSafeGuard.lock();
-        for (auto &con : mUdpConnections) {
-            boost::system::error_code error;
-            boost::system::error_code ignored_error;
+                int nPackets = _data.size();
+                // std::vectors have a more complex structure. It is dangeorous because packets may get lost! 666
+                // Send Number of packets
+                {
+                    boost::array<char, sizeof(int)> send_buffer;
+                    memcpy(&send_buffer[0], &nPackets, sizeof(int));
+                    try {
+                        mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
+                    }
+                    catch (std::exception &e) {
+                        std::cerr << e.what() << std::endl;
+                    }
+                }
 
-            int nPackets = _data.size();
-            // std::vectors have a more complex structure. It is dangeorous because packets may get lost! 666
-            // Send Number of packets
-            {
-                boost::array<char, sizeof(int)> send_buffer;
-                memcpy(&send_buffer[0], &nPackets, sizeof(int));
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 try {
-                    mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
+                    mServerSocket->send_to(boost::asio::buffer(_data), *con, 0, ignored_error);
                 }
                 catch (std::exception &e) {
                     std::cerr << e.what() << std::endl;
                 }
             }
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            try {
-                mServerSocket->send_to(boost::asio::buffer(_data), *con, 0, ignored_error);
-            }
-            catch (std::exception &e) {
-                std::cerr << e.what() << std::endl;
-            }
-        }
-        mSafeGuard.unlock();
+            mSafeGuard.unlock();
         }    
     }
 }

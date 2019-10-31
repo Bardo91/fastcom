@@ -19,54 +19,16 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_PUBLISHER_H_
-#define _FASTCOM_PUBLISHER_H_
+#ifndef _FASTCOM_MACROS_H_
+#define _FASTCOM_MACROS_H_
 
-#include <boost/asio.hpp>
-#include <thread>
-#include <mutex>
+#include <vector>
 
-#include <fastcom/macros.h>
+// Helper structures to differentiate normal implementation with vector implementation
+template<typename T> 
+struct is_vector : public std::false_type {};
 
-namespace fastcom{
-    /// Class that broadcast information.
-    template<typename DataType_>
-    class Publisher{
-        public:
-            /// Basic constructor. It binds to an specific port and sends information to subscriber
-            /// \param _port: ports to be binded.
-            Publisher(int _port);
-
-            /// Basic desconstructor.
-            ~Publisher();
-
-            /// Publish information to the subscribers
-            /// \param _data: data to be published.
-            void publish(const DataType_ &_data);
-
-        private:
-            template<typename T_ = DataType_, class = typename std::enable_if<!is_vector<T_>{}, T_>::type>
-            void publish_impl(const DataType_ &_data);
-
-            template<typename T_ = DataType_, class = typename std::enable_if<is_vector<T_>{}, T_>::type>
-            void publish_impl(const T_ &_data);
-            
-            // void publish_impl(const typename std::enable_if<is_vector<DataType_>{}, DataType_>::type &_data);
-        
-        private:
-            int mPort;
-            std::vector<boost::asio::ip::udp::endpoint*> mUdpConnections;
-            boost::asio::ip::udp::socket *mServerSocket;
-			std::thread mListenThread;
-			bool mRun = false;
-			std::mutex mSafeGuard;
-    };
-}
-
-#include <fastcom/Publisher.inl>
-
-// Specializations
-#include <fastcom/impl/StringPublisher.inl>
-#include <fastcom/impl/VectorPublisher.inl>
+template<typename T, typename A>
+struct is_vector<std::vector<T, A>> : public std::true_type {};
 
 #endif
