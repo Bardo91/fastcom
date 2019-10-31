@@ -1,3 +1,4 @@
+
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
@@ -19,54 +20,32 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_PUBLISHER_H_
-#define _FASTCOM_PUBLISHER_H_
 
-#include <boost/asio.hpp>
-#include <thread>
-#include <mutex>
-
-#include <fastcom/macros.h>
+#include <vector>
 
 namespace fastcom{
-    /// Class that broadcast information.
+    
     template<typename DataType_>
-    class Publisher{
-        public:
-            /// Basic constructor. It binds to an specific port and sends information to subscriber
-            /// \param _port: ports to be binded.
-            Publisher(int _port);
-
-            /// Basic desconstructor.
-            ~Publisher();
-
-            /// Publish information to the subscribers
-            /// \param _data: data to be published.
-            void publish(const DataType_ &_data);
-
-        private:
-            template<typename T_ = DataType_, class = typename std::enable_if<!is_vector<T_>{}, T_>::type>
-            void publish_impl(const DataType_ &_data);
-
-            template<typename T_ = DataType_, class = typename std::enable_if<is_vector<T_>{}, T_>::type>
-            void publish_impl(const T_ &_data);
-            
-            // void publish_impl(const typename std::enable_if<is_vector<DataType_>{}, DataType_>::type &_data);
+	template<typename T_, class>
+    bool Subscriber<DataType_>::listenCallback_impl(T_ &_packet){
+        boost::asio::ip::udp::endpoint sender_endpoint;
         
-        private:
-            int mPort;
-            std::vector<boost::asio::ip::udp::endpoint*> mUdpConnections;
-            boost::asio::ip::udp::socket *mServerSocket;
-			std::thread mListenThread;
-			bool mRun = false;
-			std::mutex mSafeGuard;
-    };
+        int nPackets = -1;
+        
+        boost::array<char, sizeof(int)> recv_buf;
+        size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+        if(len != sizeof(int)){
+            return false;
+        }
+        memcpy(&nPackets, &recv_buf[0], sizeof(int));
+    
+        T_ vectorPackets(nPackets);
+        len = mSocket->receive_from(boost::asio::buffer(vectorPackets), sender_endpoint);
+        if(len != sizeof(int)*nPackets){
+            return false;
+        }
+
+        _packet = vectorPackets;
+        return true;
+    }
 }
-
-#include <fastcom/Publisher.inl>
-
-// Specializations
-#include <fastcom/impl/StringPublisher.inl>
-#include <fastcom/impl/VectorPublisher.inl>
-
-#endif

@@ -26,9 +26,9 @@
 #include <string>
 
 namespace fastcom{
-    static const std::string FASTCOM_VERSION = "1.2.0";
+    static const std::string FASTCOM_VERSION = "1.3.0";
     static const std::string FASTCOM_VERSION_MAJOR = "1";
-    static const std::string FASTCOM_VERSION_MINOR = "2";
+    static const std::string FASTCOM_VERSION_MINOR = "3";
     static const std::string FASTCOM_VERSION_REVIEW = "0";
 }
 

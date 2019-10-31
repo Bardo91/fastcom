@@ -27,6 +27,8 @@
 #include <mutex>
 #include <boost/asio/deadline_timer.hpp>
 
+#include <fastcom/macros.h>
+
 namespace fastcom{
     /// Class to subscribe to information. 
     template<typename DataType_>
@@ -47,13 +49,22 @@ namespace fastcom{
             /// Attach a callback to a subscription. Each time data arrives the attached callback are called
             void attachCallback(std::function<void(DataType_ &)> _callback);
 
+            bool isConnected() const { return mRun; };
+
         private:
             void asyncConnectionHandle(const boost::system::error_code &error, std::size_t length);
             bool mReceivedConnectionNotification = false;
             void checkDeadline();
 
             void listenCallback();
+            
 
+            template<typename T_ = DataType_, class = typename std::enable_if<!is_vector<T_>{}, T_>::type>
+            bool listenCallback_impl(DataType_ &_data);
+
+            template<typename T_ = DataType_, class = typename std::enable_if<is_vector<T_>{}, T_>::type>
+            bool listenCallback_impl(T_ &_data);
+            
         private:
             boost::asio::ip::udp::endpoint mEndpoint;
             boost::asio::ip::udp::socket *mSocket;
@@ -75,6 +86,7 @@ namespace fastcom{
 
 // Specializations
 #include <fastcom/impl/StringSubscriber.inl>
+#include <fastcom/impl/VectorSubscriber.inl>
 
 
 #endif

@@ -1,3 +1,4 @@
+
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
@@ -19,54 +20,41 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_PUBLISHER_H_
-#define _FASTCOM_PUBLISHER_H_
-
-#include <boost/asio.hpp>
-#include <thread>
-#include <mutex>
-
-#include <fastcom/macros.h>
+#include <vector>
 
 namespace fastcom{
-    /// Class that broadcast information.
     template<typename DataType_>
-    class Publisher{
-        public:
-            /// Basic constructor. It binds to an specific port and sends information to subscriber
-            /// \param _port: ports to be binded.
-            Publisher(int _port);
+    template<typename T_, class>
+    void Publisher<DataType_>::publish_impl(const T_ &_data){
+        if(mRun && mServerSocket){
+            mSafeGuard.lock();
+            for (auto &con : mUdpConnections) {
+                boost::system::error_code error;
+                boost::system::error_code ignored_error;
 
-            /// Basic desconstructor.
-            ~Publisher();
+                int nPackets = _data.size();
+                // std::vectors have a more complex structure. It is dangeorous because packets may get lost! 666
+                // Send Number of packets
+                {
+                    boost::array<char, sizeof(int)> send_buffer;
+                    memcpy(&send_buffer[0], &nPackets, sizeof(int));
+                    try {
+                        mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
+                    }
+                    catch (std::exception &e) {
+                        std::cerr << e.what() << std::endl;
+                    }
+                }
 
-            /// Publish information to the subscribers
-            /// \param _data: data to be published.
-            void publish(const DataType_ &_data);
-
-        private:
-            template<typename T_ = DataType_, class = typename std::enable_if<!is_vector<T_>{}, T_>::type>
-            void publish_impl(const DataType_ &_data);
-
-            template<typename T_ = DataType_, class = typename std::enable_if<is_vector<T_>{}, T_>::type>
-            void publish_impl(const T_ &_data);
-            
-            // void publish_impl(const typename std::enable_if<is_vector<DataType_>{}, DataType_>::type &_data);
-        
-        private:
-            int mPort;
-            std::vector<boost::asio::ip::udp::endpoint*> mUdpConnections;
-            boost::asio::ip::udp::socket *mServerSocket;
-			std::thread mListenThread;
-			bool mRun = false;
-			std::mutex mSafeGuard;
-    };
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                try {
+                    mServerSocket->send_to(boost::asio::buffer(_data), *con, 0, ignored_error);
+                }
+                catch (std::exception &e) {
+                    std::cerr << e.what() << std::endl;
+                }
+            }
+            mSafeGuard.unlock();
+        }    
+    }
 }
-
-#include <fastcom/Publisher.inl>
-
-// Specializations
-#include <fastcom/impl/StringPublisher.inl>
-#include <fastcom/impl/VectorPublisher.inl>
-
-#endif
