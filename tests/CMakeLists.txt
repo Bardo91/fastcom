@@ -19,8 +19,6 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.12)
- 
 ### Add test with input file
 add_executable(publisher_subscriber publisher_subscriber.cpp)
 target_link_libraries(publisher_subscriber LINK_PRIVATE fastcom)

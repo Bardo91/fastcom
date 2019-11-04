@@ -28,7 +28,7 @@ PROJECT(fastcom VERSION 1.3.0)
 #########################################
 
 option(BUILD_EXAMPLES "Compile examples" ON)
-option(BUILD_TESTS "Prepare tests" OFF)
+option(BUILD_TESTS "Prepare tests" ON)
 
 if(UNIX)
 	add_definitions(-std=c++11 -pthread -lpthread)
@@ -82,6 +82,10 @@ if(OpenCV_FOUND)
 endif(OpenCV_FOUND)
 
 
+if(WIN32)
+	target_compile_definitions(${PROJECT_NAME} PUBLIC "_WIN32_WINNT=0x0601")
+endif()
+
 # Find python latest version
 find_package (Python3)
 if(${Python3_FOUND})
@@ -116,11 +120,22 @@ endif()
 ######			Test				######
 #########################################
 
-find_package(GTest)
-if(${GTest_FOUND})
-  enable_testing()
-  add_subdirectory(tests)
+if(${BUILD_TESTS})
+if(WIN32)
+	enable_testing()
+	add_definitions("-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
+	include(cmake/AddGoogleTest.cmake)
+	add_subdirectory(tests)
 endif()
+if(UNIX)
+	find_package(GTest)
+	if(${GTest_FOUND})
+	  enable_testing()
+	  add_subdirectory(tests)
+	endif()
+endif()
+endif()
+
 
 #########################################
 ######			INSTALL 		   ######

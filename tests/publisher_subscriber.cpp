@@ -63,7 +63,7 @@ TEST(FloatTest, FloatTest)  {
         expectedValue += 1.0f;
     });
 
-    for(int msg = 1; msg < 10; msg = msg+1.0f){
+    for(float msg = 1; msg < 10.0f; msg = msg+1.0f){
         publisher.publish(msg);
     }
 

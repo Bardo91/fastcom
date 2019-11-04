@@ -32,12 +32,12 @@ namespace fastcom{
                 boost::system::error_code error;
                 boost::system::error_code ignored_error;
 
-                int nPackets = _data.size();
+                size_t nPackets = _data.size();
                 // std::vectors have a more complex structure. It is dangeorous because packets may get lost! 666
                 // Send Number of packets
                 {
-                    boost::array<char, sizeof(int)> send_buffer;
-                    memcpy(&send_buffer[0], &nPackets, sizeof(int));
+                    boost::array<char, sizeof(size_t)> send_buffer;
+                    memcpy(&send_buffer[0], &nPackets, sizeof(size_t));
                     try {
                         mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
                     }

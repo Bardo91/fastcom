@@ -30,14 +30,14 @@ namespace fastcom{
     bool Subscriber<std::string>::listenCallback_impl(std::string &_packet){
         boost::asio::ip::udp::endpoint sender_endpoint;
         
-        int nPackets = -1;
+		size_t nPackets = 0;
         
-        boost::array<char, sizeof(int)> recv_buf;
+        boost::array<char, sizeof(size_t)> recv_buf;
         size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-        if(len != sizeof(int)){
+        if(len != sizeof(size_t)){
             return false;
         }
-        memcpy(&nPackets, &recv_buf[0], sizeof(int));
+        memcpy(&nPackets, &recv_buf[0], sizeof(size_t));
     
         std::vector<char> stdBuffer(nPackets);
         len = mSocket->receive_from(boost::asio::buffer(stdBuffer), sender_endpoint);
