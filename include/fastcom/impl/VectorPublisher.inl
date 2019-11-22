@@ -24,8 +24,8 @@
 
 namespace fastcom{
     template<typename DataType_>
-    template<typename T_, class>
-    void Publisher<DataType_>::publish_impl(const T_ &_data){
+    template<typename T_ , typename> 
+    inline void Publisher<DataType_>::publish_impl_vec(const T_ &_data){
         if(mRun && mServerSocket){
             mSafeGuard.lock();
             for (auto &con : mUdpConnections) {

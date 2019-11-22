@@ -45,11 +45,14 @@ namespace fastcom{
             void publish(const DataType_ &_data);
 
         private:
-            template<typename T_ = DataType_, class = typename std::enable_if<!is_vector<T_>{}, T_>::type>
-            void publish_impl(const DataType_ &_data);
+            template<typename T_ = DataType_, typename = typename std::enable_if<!is_vector<DataType_>::value && !is_string<DataType_>::value, T_>::type>
+            void publish_impl_gen(const T_&_data);
 
-            template<typename T_ = DataType_, class = typename std::enable_if<is_vector<T_>{}, T_>::type>
-            void publish_impl(const T_ &_data);
+            template<typename T_ = DataType_, typename = typename std::enable_if<is_vector<DataType_>::value, T_>::type> 
+            void publish_impl_vec(const T_ &_data);
+
+            template<typename T_ = DataType_, typename = typename std::enable_if<is_string<DataType_>::value, T_>::type>
+            void publish_impl_str(const T_ &_data);
             
             // void publish_impl(const typename std::enable_if<is_vector<DataType_>{}, DataType_>::type &_data);
         

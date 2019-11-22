@@ -102,14 +102,21 @@ namespace fastcom {
     }
     //-----------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
-    void Publisher<DataType_>::publish(const DataType_ &_data){
-		publish_impl(_data);
+    inline void Publisher<DataType_>::publish(const DataType_ &_data){
+		if constexpr(!is_vector<DataType_>::value && !is_string<DataType_>::value)
+			publish_impl_gen(_data);
+		else if constexpr(is_vector<DataType_>::value)
+			publish_impl_vec(_data);                
+		else if constexpr(is_string<DataType_>::value)
+			publish_impl_str(_data);
+		else
+			assert(false);
     }
 
 	//-----------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
-	template<typename T_, class>
-    void Publisher<DataType_>::publish_impl(const DataType_ &_data){
+	template<typename T_, typename>
+    inline void Publisher<DataType_>::publish_impl_gen(const T_ &_data){
     	if(mRun && mServerSocket){
 			mSafeGuard.lock();
 			for (auto &con : mUdpConnections) {
@@ -128,4 +135,5 @@ namespace fastcom {
 			mSafeGuard.unlock();
         }    
     }
+	
 } 

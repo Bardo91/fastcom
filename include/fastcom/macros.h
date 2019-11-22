@@ -23,14 +23,29 @@
 #define _FASTCOM_MACROS_H_
 
 #include <vector>
+#include <string>
 
 #define MAX_STRING_SIZE 30
 
 // Helper structures to differentiate normal implementation with vector implementation
 template<typename T> 
-struct is_vector : public std::false_type {};
+struct is_vector {
+    static const bool value = false;
+};
 
 template<typename T, typename A>
-struct is_vector<std::vector<T, A>> : public std::true_type {};
+struct is_vector<std::vector<T, A>>{
+    static const bool value = true;
+};
+
+template<typename T>
+struct is_string {
+    static const bool value = false;
+};
+
+template<>
+struct is_string<std::string> {
+    static const bool value = true;
+};
 
 #endif

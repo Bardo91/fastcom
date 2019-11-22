@@ -25,6 +25,7 @@
 #include <boost/bind.hpp>
 #include <iostream>
 
+#include <fastcom/macros.h>
 
 namespace fastcom{
     //---------------------------------------------------------------------------------------------------------------------
@@ -146,7 +147,16 @@ namespace fastcom{
         while(mRun){
             try{
                 DataType_ packet;
-                if(listenCallback_impl(packet)){
+
+                bool result = false;
+                if constexpr(!is_vector<DataType_>::value && !is_string<DataType_>::value)
+                    result = listenCallback_impl_gen(packet);
+                else if constexpr(is_vector<DataType_>::value)
+                    result = listenCallback_impl_vec(packet);                
+                else if constexpr(is_string<DataType_>::value)
+                    result = listenCallback_impl_str(packet);
+
+                if(result){
                     mLastStamp = std::chrono::system_clock::now();
 
                     mCallbackGuard.lock();
@@ -166,8 +176,8 @@ namespace fastcom{
 
     //---------------------------------------------------------------------------------------------------------------------
     template<typename DataType_>
-	template<typename T_, class>
-    bool Subscriber<DataType_>::listenCallback_impl(DataType_ &_packet){
+	template<typename T_, typename>
+    bool Subscriber<DataType_>::listenCallback_impl_gen(T_ &_packet){
         boost::array<char, sizeof(DataType_)> recv_buf;
         boost::asio::ip::udp::endpoint sender_endpoint;
 

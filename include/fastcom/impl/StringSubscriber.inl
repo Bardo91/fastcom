@@ -25,9 +25,9 @@
 
 namespace fastcom{
 
-    template<>
-    template<>
-    bool Subscriber<std::string>::listenCallback_impl(std::string &_packet){
+    template<typename DataType_>
+    template<typename T_, typename>
+    inline bool Subscriber<DataType_>::listenCallback_impl_str(T_ &_packet){
         boost::asio::ip::udp::endpoint sender_endpoint;
         
 		size_t nPackets = 0;
