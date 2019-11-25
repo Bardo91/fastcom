@@ -21,7 +21,7 @@
 ##  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##---------------------------------------------------------------------------------------------------------------------
 
-FASTCOM_VERSION = "1.4.0"
+FASTCOM_VERSION = "1.4.1"
 FASTCOM_VERSION_MAJOR = "1"
 FASTCOM_VERSION_MINOR = "4"
-FASTCOM_VERSION_REVIEW = "0"
+FASTCOM_VERSION_REVIEW = "1"
