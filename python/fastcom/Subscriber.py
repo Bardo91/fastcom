@@ -38,7 +38,6 @@ class Subscriber:
         # Create socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.server_address = (_host, _port)
-
         # Ensure connection
         #self.sock.setblocking(False)
         #self.sock.settimeout(0.2)
@@ -52,6 +51,7 @@ class Subscriber:
         #    except socket.timeout:
         #        pass
         #
+        self.sock.sendto(b'1', self.server_address)
         receivedConnection = True
         self.sock.setblocking(True)
 
