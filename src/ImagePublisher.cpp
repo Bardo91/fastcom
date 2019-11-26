@@ -27,14 +27,12 @@
 namespace fastcom{
     ImagePublisher::ImagePublisher(int _port) {
         mPublisher = new Publisher<ImageDataPacket>(_port);
+		params.push_back(cv::IMWRITE_JPEG_QUALITY);
+		params.push_back(30); //image quality
     }
 
-    void ImagePublisher::publish(cv::Mat &_image, int _compression){
-        std::vector<int> params;
-        params.push_back( cv::IMWRITE_JPEG_QUALITY);
-        params.push_back(30); //image quality
-        std::vector<uchar> buffer;
-
+    void ImagePublisher::publish(cv::Mat _image, int _compression){
+		buffer.clear();
         cv::imencode(".jpg", _image, buffer, params);
         auto bufferPtr = buffer.begin();
 

@@ -135,5 +135,10 @@ namespace fastcom {
 			mSafeGuard.unlock();
         }    
     }
-	
+
+	//-----------------------------------------------------------------------------------------------------------------
+	template<typename DataType_>
+	inline unsigned int Publisher<DataType_>::nConnections() {
+		return mUdpConnections.size();
+	}
 } 

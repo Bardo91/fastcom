@@ -60,9 +60,11 @@ namespace fastcom{
             /// Publish an image to the subscribers.
             /// \param _image: image to be published.
             /// \param _compression: JPG compression rate.
-            void publish(cv::Mat &_image, int _compression = 50);
+            void publish(cv::Mat _image, int _compression = 50);
         private:
             Publisher<ImageDataPacket> *mPublisher;
+			std::vector<int> params;
+			std::vector<uchar> buffer;
     };
 }
 

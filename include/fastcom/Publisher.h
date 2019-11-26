@@ -44,6 +44,9 @@ namespace fastcom{
             /// \param _data: data to be published.
             void publish(const DataType_ &_data);
 
+			/// Return number of connected subscribers
+			unsigned int nConnections();
+
         private:
             template<typename T_ = DataType_, typename = typename std::enable_if<!is_vector<DataType_>::value && !is_string<DataType_>::value, T_>::type>
             void publish_impl_gen(const T_&_data);
