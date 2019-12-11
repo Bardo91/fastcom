@@ -41,7 +41,7 @@ namespace fastcom{
     
         T_ vectorPackets(nPackets);
         len = mSocket->receive_from(boost::asio::buffer(vectorPackets), sender_endpoint);
-        if(len != sizeof(int)*nPackets){
+        if(len != sizeof(typename T_::value_type)*nPackets){
             return false;
         }
 
