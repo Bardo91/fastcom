@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,44 +22,46 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/Publisher.h>
-#include <fastcom/Subscriber.h>
+#ifndef FASTCOM_CONNECTIONMANAGER_H_
+#define FASTCOM_CONNECTIONMANAGER_H_
 
+#include <functional>
 #include <thread>
-#include <iostream>
-#include <chrono>
 
-struct SimpleFloat{
-    float a;
-    float b;
-    float c;
-};
+#include <websocketpp/config/asio_no_tls_client.hpp>
+#include <websocketpp/client.hpp>
 
-int main(){
+namespace fastcom{
 
-    fastcom::Publisher<SimpleFloat> *publisher;
-    fastcom::Subscriber<SimpleFloat> *subscriber;
+    class ConnectionManager{
+    public:
+        static ConnectionManager &get();
 
-    for(unsigned iter = 0; iter < 10; iter++){
-		publisher = new fastcom::Publisher<SimpleFloat>(8888);
-		subscriber = new fastcom::Subscriber<SimpleFloat>("127.0.0.1", 8888);
+        void registerUri(const std::string &_ip, const uint16_t &_port, const std::string &_uri);
 
-	    subscriber->attachCallback([&](SimpleFloat &_data){
-			std::cout << _data.a << std::endl;
-	    });
+        void unregisterUri(const std::string &_ip, const uint16_t &_port, const std::string &_uri);
 
-		
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));   
-	    SimpleFloat data;
-	    data.a = 0;
-	    for(int i = 1;i<10;i++){
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));   
-			publisher->publish(data);
-			data.a +=1;
-	    }
+    private:
+        // singletone!
+        ConnectionManager();
+        static ConnectionManager *instance_;
+    
+        typedef websocketpp::client<websocketpp::config::asio_client> Client;
+        Client *connectionWithMole_;
+        Client::connection_ptr *connectionHandler_;
+        std::thread connectionThread_;
 
-	    delete publisher;
-	    delete subscriber;
-	    std::cout << "start again" << std::endl;
-    }
+        std::mutex connectionGuard_;
+        std::condition_variable connectionCV_;
+        bool connectToMole();
+        bool initMole();
+        bool isConnectedToMole();
+        bool isConnected_ = false;
+
+    private:
+
+    };
+
 }
+
+#endif

@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,60 +22,25 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_PUBLISHER_H_
-#define _FASTCOM_PUBLISHER_H_
+#ifndef FASTCOM_PUBLISHER_H_
+#define FASTCOM_PUBLISHER_H_
 
-#include <boost/asio.hpp>
-#include <thread>
-#include <mutex>
-
-#include <fastcom/macros.h>
+#include <string>
 
 namespace fastcom{
-    /// Class that broadcast information.
-    template<typename DataType_>
+    template<typename SerializableObject_>
     class Publisher{
-        public:
-            /// Basic constructor. It binds to an specific port and sends information to subscriber
-            /// \param _port: ports to be binded.
-            Publisher(int _port);
+    public:
+        /// Creates publisher given URI
+        Publisher(std::string _uri);
 
-            /// Basic desconstructor.
-            ~Publisher();
+        /// Send the message to all the subscribers connected to it
+        void publish(SerializableObject_ _msg);
 
-            /// Publish information to the subscribers
-            /// \param _data: data to be published.
-            void publish(const DataType_ &_data);
+    private:
 
-			/// Return number of connected subscribers
-			unsigned int nConnections();
-
-        private:
-            template<typename T_ = DataType_, typename = typename std::enable_if<!is_vector<DataType_>::value && !is_string<DataType_>::value, T_>::type>
-            void publish_impl_gen(const T_&_data);
-
-            template<typename T_ = DataType_, typename = typename std::enable_if<is_vector<DataType_>::value, T_>::type> 
-            void publish_impl_vec(const T_ &_data);
-
-            template<typename T_ = DataType_, typename = typename std::enable_if<is_string<DataType_>::value, T_>::type>
-            void publish_impl_str(const T_ &_data);
-            
-            // void publish_impl(const typename std::enable_if<is_vector<DataType_>{}, DataType_>::type &_data);
-        
-        private:
-            int mPort;
-            std::vector<boost::asio::ip::udp::endpoint*> mUdpConnections;
-            boost::asio::ip::udp::socket *mServerSocket;
-			std::thread mListenThread;
-			bool mRun = false;
-			std::mutex mSafeGuard;
     };
+
 }
-
-#include <fastcom/Publisher.inl>
-
-// Specializations
-#include <fastcom/impl/StringPublisher.inl>
-#include <fastcom/impl/VectorPublisher.inl>
 
 #endif

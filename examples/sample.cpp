@@ -1,8 +1,10 @@
-
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -20,41 +22,36 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <vector>
 
-namespace fastcom{
-    template<typename DataType_>
-    template<typename T_ , typename> 
-    inline void Publisher<DataType_>::publish_impl_vec(const T_ &_data){
-        if(mRun && mServerSocket){
-            mSafeGuard.lock();
-            for (auto &con : mUdpConnections) {
-                boost::system::error_code error;
-                boost::system::error_code ignored_error;
+#include <fastcom/Publisher.h>
+#include <fastcom/Subscriber.h>
 
-                size_t nPackets = _data.size();
-                // std::vectors have a more complex structure. It is dangeorous because packets may get lost! 666
-                // Send Number of packets
-                {
-                    boost::array<char, sizeof(size_t)> send_buffer;
-                    memcpy(&send_buffer[0], &nPackets, sizeof(size_t));
-                    try {
-                        mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
-                    }
-                    catch (std::exception &e) {
-                        std::cerr << e.what() << std::endl;
-                    }
-                }
+#include <fastcom/ConnectionManager.h>
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                try {
-                    mServerSocket->send_to(boost::asio::buffer(_data), *con, 0, ignored_error);
-                }
-                catch (std::exception &e) {
-                    std::cerr << e.what() << std::endl;
-                }
-            }
-            mSafeGuard.unlock();
-        }    
+#include <string>
+#include <thread>
+#include <chrono>
+#include <iostream>
+
+int main(){
+    
+    // fastcom::Publisher<std::string> p1("/greetings");
+    // fastcom::Subscriber<std::string> s1("/greetings");
+
+    // s1.addCallback([&](const std::string &_msg){
+    //     std::cout << _msg << std::endl;
+    // });
+
+    auto &cm = fastcom::ConnectionManager::get();
+
+    std::cout << "initialized manager" << std::endl;
+
+    cm.registerUri("0.0.0.0", 9000, "/integer_count");
+
+    while (true) {
+        // p1.publish("Hey! you are welcome!");
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    
+
 }

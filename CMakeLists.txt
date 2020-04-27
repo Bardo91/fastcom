@@ -22,13 +22,12 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 PROJECT(fastcom VERSION 1.3.0)
 
-
 #########################################
 ######			General config	   ######
 #########################################
 
 option(BUILD_EXAMPLES "Compile examples" ON)
-option(BUILD_TESTS "Prepare tests" ON)
+option(BUILD_TESTS "Prepare tests" OFF)
 
 if(UNIX)
 	add_definitions(-std=c++11 -pthread -lpthread)
@@ -42,11 +41,6 @@ endif()
 #########################################
 set(Boost_USE_MULTITHREAD ON)
 
-find_package(Boost REQUIRED COMPONENTS system thread regex)
-
-find_package(OpenCV)
-
-
 #########################################
 ######			Library	   ######
 #########################################
@@ -58,7 +52,7 @@ if(UNIX)
 elseif(WIN32)
 	add_library(${PROJECT_NAME} STATIC ${FASTCOM_SOURCES} ${FASTCOM_HEADERS})
 endif()
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -72,14 +66,20 @@ elseif(WIN32)
 	target_compile_options(${PROJECT_NAME} PUBLIC "/EHsc")
 endif()
 
+find_package(Boost REQUIRED COMPONENTS system thread regex)
 target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${Boost_LIBRARIES})
 
+find_package(OpenCV)
 if(OpenCV_FOUND)
   target_include_directories(${PROJECT_NAME} PUBLIC ${OpenCV_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${OpenCV_LIBRARIES})
   target_compile_definitions(${PROJECT_NAME} PUBLIC FASTCOM_HAS_OPENCV)
 endif(OpenCV_FOUND)
+
+
+find_package(websocketpp REQUIRED)
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC websocketpp::websocketpp)
 
 
 if(WIN32)
@@ -120,21 +120,21 @@ endif()
 ######			Test				######
 #########################################
 
-if(${BUILD_TESTS})
-if(WIN32)
-	enable_testing()
-	add_definitions("-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
-	include(cmake/AddGoogleTest.cmake)
-	add_subdirectory(tests)
-endif()
-if(UNIX)
-	find_package(GTest)
-	if(${GTest_FOUND})
-	  enable_testing()
-	  add_subdirectory(tests)
-	endif()
-endif()
-endif()
+# if(${BUILD_TESTS})
+# if(WIN32)
+# 	enable_testing()
+# 	add_definitions("-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
+# 	include(cmake/AddGoogleTest.cmake)
+# 	add_subdirectory(tests)
+# endif()
+# if(UNIX)
+# 	find_package(GTest)
+# 	if(${GTest_FOUND})
+# 	  enable_testing()
+# 	  add_subdirectory(tests)
+# 	endif()
+# endif()
+# endif()
 
 
 #########################################

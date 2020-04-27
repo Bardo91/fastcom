@@ -20,31 +20,12 @@
 ##---------------------------------------------------------------------------------------------------------------------
 
 add_executable(example_sender "sender.cpp")
-target_include_directories(example_sender PRIVATE "../include")
 target_link_libraries(example_sender LINK_PUBLIC fastcom)
 
 add_executable(example_receiver "receiver.cpp")
-target_include_directories(example_receiver PRIVATE "../include")
 target_link_libraries(example_receiver LINK_PUBLIC fastcom)
 
 
-add_executable(example_sender_image "sender_image.cpp")
-target_include_directories(example_sender_image PRIVATE "../include")
-target_link_libraries(example_sender_image LINK_PUBLIC fastcom)
 
-add_executable(example_receiver_image "receiver_image.cpp")
-target_include_directories(example_receiver_image PRIVATE "../include")
-target_link_libraries(example_receiver_image LINK_PUBLIC fastcom)
-
-add_executable(example_destruction "destruction.cpp")
-target_include_directories(example_destruction PRIVATE "../include")
-target_link_libraries(example_destruction LINK_PUBLIC fastcom)
-
-
-add_executable(example_service_client "service_client.cpp")
-target_include_directories(example_service_client PRIVATE "../include")
-target_link_libraries(example_service_client LINK_PUBLIC fastcom)
-
-add_executable(example_service_server "service_server.cpp")
-target_include_directories(example_service_server PRIVATE "../include")
-target_link_libraries(example_service_server LINK_PUBLIC fastcom)
+add_executable(sample "sample.cpp")
+target_link_libraries(sample LINK_PUBLIC fastcom)

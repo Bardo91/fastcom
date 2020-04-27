@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,56 +22,58 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_IMAGESUBSCRIBER_H_
-#define _FASTCOM_IMAGESUBSCRIBER_H_
+#ifndef FASTCOM_MOLE_H_
+#define FASTCOM_MOLE_H_
 
-#include <fastcom/ImagePublisher.h>
-
-#include <functional>
+#include <unordered_map>
 #include <mutex>
+#include <string>
 #include <thread>
+#include <vector>
 
-#ifdef FASTCOM_HAS_OPENCV
 
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
+#include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/server.hpp>
 
 namespace fastcom{
-    template<typename T_>
-    class Subscriber;
 
-    /// Subscriber specialized for image transmission
-    class ImageSubscriber {
-        public:
-            /// Constructor to subscribe to ImagePublishers in different computers.
-            /// \param _ip: IP where the ImagePublisher is located
-            /// \param _port: Specific port in the IP to bind
-            ImageSubscriber(std::string _ip, int _port);
+    class Mole{
+    public:
+        typedef websocketpp::server<websocketpp::config::asio> Server;
 
-            /// Constructor to subscribe to ImagePublishers. It assumes that the publisher is in the same computer
-            /// \param _port: Specific port in the IP to bind
-            ImageSubscriber(int _port);
+        static uint16_t port();
 
-            /// Attach a callback to a subscription. Each time an image arrives the attached callback are called
-            void attachCallback(std::function<void(cv::Mat &)> &_callback);
-            
-        private:
-            void coreCallback(ImageDataPacket &_data);
+        static bool init();
 
-        private:
-            Subscriber<ImageDataPacket> *mSubscriber;
-            
-            std::mutex mCallbackGuard;
-            std::vector<std::function<void(cv::Mat &)>> mCallbacks;
+    private:
+        Mole();
+        ~Mole();
+        static Mole *instance_;
 
+        void onMessage(websocketpp::connection_hdl hdl, Server::message_ptr msg);
+        void onOpen(websocketpp::connection_hdl hdl);
+        void onClose(websocketpp::connection_hdl hdl);
 
-            bool isFirst = true;
-            int packetId = -1;
-            std::vector<char> totalBuffer;
+        enum class MessageType {Unknown, RegisterUri, UnregisterUri, CloseMole, QueryPublishers};
+        MessageType decodeAction(const std::string &_uri);
+        void doAction(Server::connection_ptr hdl, MessageType _type, std::string _data);
+
+        void registerUri(std::string _uri);
+        void unregisterUri(std::string _uri);
+        void closeMole();
+        void sendListPublishers(std::string _uri);
+
+    private: // Comm related membersXD
+        static const uint16_t port_ = 22322;
+        std::thread listenThread_;
+        Server *server_;
+
+        // Map with connections and uris.
+        std::unordered_map<std::string, std::vector<std::string>> uriTable_;
+        std::mutex serverGuard_;
+        static bool isInit_;
     };
-}
 
-#endif
+}
 
 #endif
