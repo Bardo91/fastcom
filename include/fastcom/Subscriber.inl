@@ -21,32 +21,3 @@
 //  OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
-
-
-#include <fastcom/Publisher.h>
-#include <fastcom/Subscriber.h>
-
-#include <fastcom/ConnectionManager.h>
-
-#include <string>
-#include <thread>
-#include <chrono>
-#include <iostream>
-
-int main(){
-
-    fastcom::Publisher<std::string> p1("/integer_count");
-    // fastcom::Subscriber<std::string> s1("/integer_count");
-
-    // s1.addCallback([&](const std::string &_msg){
-    //     std::cout << _msg << std::endl;
-    // });
-
-
-    while (true) {
-        // p1.publish("Hey! you are welcome!");
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    
-
-}

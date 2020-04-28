@@ -46,6 +46,8 @@ namespace fastcom{
         ConnectionManager();
         static ConnectionManager *instance_;
     
+    private:
+        // Connection with mole
         typedef websocketpp::client<websocketpp::config::asio_client> Client;
         Client *connectionWithMole_;
         Client::connection_ptr *connectionHandler_;

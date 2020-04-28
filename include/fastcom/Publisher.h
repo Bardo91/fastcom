@@ -27,20 +27,47 @@
 
 #include <string>
 
+#include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/server.hpp>
+
+#include <set>
+
 namespace fastcom{
     template<typename SerializableObject_>
     class Publisher{
     public:
         /// Creates publisher given URI
-        Publisher(std::string _uri);
+        Publisher(const std::string &_uri);
 
         /// Send the message to all the subscribers connected to it
         void publish(SerializableObject_ _msg);
 
     private:
+        void magicInitOfData();
+        void initServer();
+
+        void on_open(websocketpp::connection_hdl hdl);
+        void on_close(websocketpp::connection_hdl hdl);
+
+    private:
+        std::string uri_;
+
+        // Server interface
+        typedef websocketpp::server<websocketpp::config::asio> Server;
+        std::string ip_;
+        uint16_t port_;
+
+        std::thread listenThread_;
+        Server internalServer_;  
+        typedef std::set<websocketpp::connection_hdl,std::owner_less<websocketpp::connection_hdl>> con_list;
+        con_list subscribers_;
+
+        std::mutex lock;
 
     };
 
 }
+
+#include <fastcom/Publisher.inl>
 
 #endif
