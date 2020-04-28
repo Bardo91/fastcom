@@ -32,19 +32,31 @@
 
 #include <functional>
 
+#include <websocketpp/config/asio_no_tls_client.hpp>
+#include <websocketpp/client.hpp>
+
 namespace fastcom{
     template<typename SerializableObject_>
     class Subscriber{
     public:
         typedef std::function<void(const SerializableObject_)> Callback;
-        Subscriber(std::string _uri);
+        Subscriber(const std::string &_uri);
 
         void addCallback(Callback _cb);
+    private:
+        typedef websocketpp::client<websocketpp::config::asio_client> Client;
+
+        void initClient();
+
+        Client client_;
+
     private:
         std::vector<Callback> callbacks_;
         std::mutex cbListLock_;
     };
 
 }
+
+#include <fastcom/Subscriber.inl>
 
 #endif

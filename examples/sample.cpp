@@ -36,7 +36,8 @@
 int main(){
 
     fastcom::Publisher<std::string> p1("/integer_count");
-    // fastcom::Subscriber<std::string> s1("/integer_count");
+    fastcom::Publisher<std::string> p2("/integer_count");
+    fastcom::Subscriber<std::string> s1("/integer_count");
 
     // s1.addCallback([&](const std::string &_msg){
     //     std::cout << _msg << std::endl;

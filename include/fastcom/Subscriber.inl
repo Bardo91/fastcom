@@ -21,3 +21,55 @@
 //  OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
+
+#include <fastcom/ConnectionManager.h>
+
+namespace fastcom{
+
+    template<typename SerializableObject_>
+    Subscriber<SerializableObject_>::Subscriber(const std::string &_uri){
+        auto &cm = fastcom::ConnectionManager::get();
+
+        cm.queryListPublishers(_uri);
+        
+    }
+
+    template<typename SerializableObject_>
+    void Subscriber<SerializableObject_>::addCallback(Callback _cb){
+
+    }
+
+    // template<typename SerializableObject_>
+    // void Subscriber<SerializableObject_>::addConnection(std::string _uri){
+    //     try {
+    //         // Set logging to be pretty verbose (everything except message payloads)
+    //         // client_.set_access_channels(websocketpp::log::alevel::all);
+    //         // client_.clear_access_channels(websocketpp::log::alevel::frame_payload);
+
+    //         client_.set_access_channels(websocketpp::log::alevel::none);
+    //         // Initialize ASIO
+    //         client_.init_asio();
+
+    //         // Register our message handler
+    //         client_.set_message_handler(std::bind(&Subscriber::on_message,this,::_1,::_2));
+
+    //         websocketpp::lib::error_code ec;
+    //         client::connection_ptr con = client_.get_connection(uri, ec);
+    //         if (ec) {
+    //             std::cout << "could not create connection because: " << eclient_.message() << std::endl;
+    //             return;
+    //         }
+
+    //         // Note that connect here only requests a connection. No network messages are
+    //         // exchanged until the event loop starts running in the next line.
+    //         client_.connect(con);
+
+    //         // Start the ASIO io_service run loop
+    //         // this will cause a single connection to be made to the server. client_.run()
+    //         // will exit when this connection is closed.
+    //         client_.run();
+    //     } catch (websocketpp::exception const & e) {
+    //         std::cout << e.what() << std::endl;
+    //     }
+    // }
+}

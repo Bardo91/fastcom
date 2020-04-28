@@ -137,7 +137,7 @@ namespace fastcom{
         case MessageType::CloseMole:
             return closeMole();
         case MessageType::QueryPublishers:
-            return sendListPublishers(_uri);
+            return sendListPublishers(_con, _uri);
         }
     }
 
@@ -146,7 +146,7 @@ namespace fastcom{
         serverGuard_.lock();
         std::string publisherInfo = _uri.substr(0, _uri.find_first_of("/"));
         std::string stream = _uri.substr(_uri.find_first_of("/"), _uri.size());
-        uriTable_[publisherInfo].push_back(_uri);
+        uriTable_[publisherInfo].push_back(stream);
         serverGuard_.unlock();
     }
 
@@ -164,10 +164,23 @@ namespace fastcom{
         // Not implemented yet
     }
 
-    void Mole::sendListPublishers(std::string _uri){
+    void Mole::sendListPublishers(Server::connection_ptr _con, std::string _uri){
         serverGuard_.lock();
         /// Need to store in uriTable also Ips and ports to be connected to.
+        std::string listPublishers;
+        for(auto &[publisher, topics]: uriTable_){
+            for(auto &topic: topics){
+                if(topic == _uri){
+                    listPublishers += publisher + ",";
+                }
+            }
+        }
         serverGuard_.unlock();
+        if(listPublishers != ""){
+            listPublishers = listPublishers.substr(0, listPublishers.size()-1);
+            websocketpp::lib::error_code ec;
+            server_->send(_con, listPublishers, websocketpp::frame::opcode::binary, ec);
+        }
     }
 
 

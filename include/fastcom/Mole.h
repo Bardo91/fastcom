@@ -61,7 +61,7 @@ namespace fastcom{
         void registerUri(std::string _uri);
         void unregisterUri(std::string _uri);
         void closeMole();
-        void sendListPublishers(std::string _uri);
+        void sendListPublishers(Server::connection_ptr _con, std::string _uri);
 
     private: // Comm related membersXD
         static const uint16_t port_ = 22322;

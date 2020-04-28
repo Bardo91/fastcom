@@ -54,6 +54,13 @@ namespace fastcom{
         connectionWithMole_->send(*connectionHandler_, data, websocketpp::frame::opcode::text, ec);
     }
 
+
+    void ConnectionManager::queryListPublishers(const std::string &_uri){
+        websocketpp::lib::error_code ec;
+        std::string data = "query_publishers,"+_uri;
+        connectionWithMole_->send(*connectionHandler_, data, websocketpp::frame::opcode::text, ec);
+    }
+
     ConnectionManager::ConnectionManager(){
         while(!connectToMole()){
             initMole();

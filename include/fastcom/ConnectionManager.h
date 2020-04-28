@@ -41,6 +41,8 @@ namespace fastcom{
 
         void unregisterUri(const std::string &_ip, const uint16_t &_port, const std::string &_uri);
 
+        void queryListPublishers(const std::string &_uri);
+
     private:
         // singletone!
         ConnectionManager();
