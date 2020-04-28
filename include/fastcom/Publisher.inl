@@ -38,8 +38,7 @@ namespace fastcom{
     template<typename SerializableObject_>
     void Publisher<SerializableObject_>::publish(SerializableObject_ _msg){
         websocketpp::lib::error_code ec;
-        std::string serializedMsg;
-        _msg >> serializedMsg;
+        std::string serializedMsg = _msg;
         
         lock.lock();
         for(auto con:subscribers_){

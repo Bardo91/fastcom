@@ -27,10 +27,11 @@
 namespace fastcom{
 
     template<typename SerializableObject_>
-    Subscriber<SerializableObject_>::Subscriber(const std::string &_uri){
+    Subscriber<SerializableObject_>::Subscriber(const std::string &_resourceName){
+        resourceName_ = _resourceName;
         auto &cm = fastcom::ConnectionManager::get();
 
-        cm.queryListPublishers(_uri);
+        cm.queryListPublishers(_resourceName, std::bind(&Subscriber<SerializableObject_>::pubListUpdatedCb, this, std::placeholders::_1));
         
     }
 
@@ -39,37 +40,47 @@ namespace fastcom{
 
     }
 
-    // template<typename SerializableObject_>
-    // void Subscriber<SerializableObject_>::addConnection(std::string _uri){
-    //     try {
-    //         // Set logging to be pretty verbose (everything except message payloads)
-    //         // client_.set_access_channels(websocketpp::log::alevel::all);
-    //         // client_.clear_access_channels(websocketpp::log::alevel::frame_payload);
+    template<typename SerializableObject_>
+    void Subscriber<SerializableObject_>::on_message(websocketpp::connection_hdl hdl, Client::message_ptr msg) {
+        std::cout << msg->get_payload() << std::endl;
+    }
 
-    //         client_.set_access_channels(websocketpp::log::alevel::none);
-    //         // Initialize ASIO
-    //         client_.init_asio();
+    template<typename SerializableObject_>
+    void Subscriber<SerializableObject_>::pubListUpdatedCb(std::vector<std::string> _list){
+        for(auto &pubUri: _list){
+            if(connectionWithPubs_.find(pubUri) == connectionWithPubs_.end()){
+                addConnection(pubUri);
+            }
+        }
+    }
 
-    //         // Register our message handler
-    //         client_.set_message_handler(std::bind(&Subscriber::on_message,this,::_1,::_2));
+    template<typename SerializableObject_>
+    void Subscriber<SerializableObject_>::addConnection(std::string _uri){
+        std::thread clientThread([&](std::string _uri){
+            std::string uri = "ws://"+_uri+resourceName_;
+            try {
+                Client *client = new Client;
+                connectionWithPubs_[_uri] = client; 
+                client->set_access_channels(websocketpp::log::alevel::none);
+                // Initialize ASIO
+                client->init_asio();
 
-    //         websocketpp::lib::error_code ec;
-    //         client::connection_ptr con = client_.get_connection(uri, ec);
-    //         if (ec) {
-    //             std::cout << "could not create connection because: " << eclient_.message() << std::endl;
-    //             return;
-    //         }
+                // Register our message handler
+                client->set_message_handler(std::bind(&Subscriber::on_message,this,std::placeholders::_1,std::placeholders::_2));
 
-    //         // Note that connect here only requests a connection. No network messages are
-    //         // exchanged until the event loop starts running in the next line.
-    //         client_.connect(con);
+                websocketpp::lib::error_code ec;
+                Client::connection_ptr con = client->get_connection(uri, ec);
+                if (ec) {
+                    std::cout << "could not create connection because: " << ec.message() << std::endl;
+                    return;
+                }
 
-    //         // Start the ASIO io_service run loop
-    //         // this will cause a single connection to be made to the server. client_.run()
-    //         // will exit when this connection is closed.
-    //         client_.run();
-    //     } catch (websocketpp::exception const & e) {
-    //         std::cout << e.what() << std::endl;
-    //     }
-    // }
+                client->connect(con);
+                client->run();
+            } catch (websocketpp::exception const & e) {
+                std::cout << e.what() << std::endl;
+            }
+        },_uri);
+        clientThread.detach();
+    }
 }

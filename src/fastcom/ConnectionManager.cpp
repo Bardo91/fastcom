@@ -55,7 +55,9 @@ namespace fastcom{
     }
 
 
-    void ConnectionManager::queryListPublishers(const std::string &_uri){
+    void ConnectionManager::queryListPublishers(const std::string &_uri, std::function<void(std::vector<std::string>)> _responseCb){
+        updateSubTable_[_uri].push_back(_responseCb);
+
         websocketpp::lib::error_code ec;
         std::string data = "query_publishers,"+_uri;
         connectionWithMole_->send(*connectionHandler_, data, websocketpp::frame::opcode::text, ec);
@@ -82,6 +84,8 @@ namespace fastcom{
                 connectionWithMole_->set_access_channels(websocketpp::log::alevel::none);
                 // Initialize ASIO
                 connectionWithMole_->init_asio();
+
+                connectionWithMole_->set_message_handler(std::bind(&ConnectionManager::moleMessage,this,std::placeholders::_1,std::placeholders::_2));
 
                 websocketpp::lib::error_code ec;
                 auto con =  connectionWithMole_->get_connection(uri, ec);
@@ -122,4 +126,34 @@ namespace fastcom{
     }
 
 
+    std::vector<std::string> split(const std::string& s, char delimiter){
+        std::vector<std::string> tokens;
+        std::string token;
+        std::istringstream tokenStream(s);
+        while (std::getline(tokenStream, token, delimiter)) {
+            tokens.push_back(token);
+        }
+        return tokens;
+    }
+
+    void ConnectionManager::moleMessage(websocketpp::connection_hdl _hdl, Client::message_ptr _msg){
+        // Parse message
+        std::string rawMsg = _msg->get_payload();
+
+        // decode action
+        std::string cmd = rawMsg.substr(0, rawMsg.find_first_of("@"));
+        rawMsg = rawMsg.substr(rawMsg.find_first_of("@")+1, rawMsg.size());
+
+        // Now we only have one action, notify new uris.
+        std::string targetUri = rawMsg.substr(0, rawMsg.find_first_of("|"));
+        rawMsg = rawMsg.substr(rawMsg.find_first_of("|")+1, rawMsg.size());
+    
+        // Decode list of publishers.
+        std::vector<std::string> list = split(rawMsg, ',');
+
+        // Update subscribers.
+        for(auto &subscriber : updateSubTable_[targetUri]){
+            subscriber(list);
+        }
+    }
 }

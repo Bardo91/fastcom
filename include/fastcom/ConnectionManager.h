@@ -41,7 +41,7 @@ namespace fastcom{
 
         void unregisterUri(const std::string &_ip, const uint16_t &_port, const std::string &_uri);
 
-        void queryListPublishers(const std::string &_uri);
+        void queryListPublishers(const std::string &_uri, std::function<void(std::vector<std::string>)> _responseCb);
 
     private:
         // singletone!
@@ -61,6 +61,10 @@ namespace fastcom{
         bool initMole();
         bool isConnectedToMole();
         bool isConnected_ = false;
+
+        void moleMessage(websocketpp::connection_hdl hdl, Client::message_ptr msg);
+
+        std::map<std::string, std::vector<std::function<void(std::vector<std::string>)>>> updateSubTable_;
 
     private:
 

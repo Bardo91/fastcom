@@ -167,7 +167,7 @@ namespace fastcom{
     void Mole::sendListPublishers(Server::connection_ptr _con, std::string _uri){
         serverGuard_.lock();
         /// Need to store in uriTable also Ips and ports to be connected to.
-        std::string listPublishers;
+        std::string listPublishers = "list@"+_uri+"|";
         for(auto &[publisher, topics]: uriTable_){
             for(auto &topic: topics){
                 if(topic == _uri){

@@ -25,10 +25,10 @@
 #ifndef FASTCOM_SUBSCRIBER_H_
 #define FASTCOM_SUBSCRIBER_H_
 
-
+#include <map>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
 
 #include <functional>
 
@@ -40,19 +40,22 @@ namespace fastcom{
     class Subscriber{
     public:
         typedef std::function<void(const SerializableObject_)> Callback;
-        Subscriber(const std::string &_uri);
+        Subscriber(const std::string &_resourceName);
 
         void addCallback(Callback _cb);
     private:
         typedef websocketpp::client<websocketpp::config::asio_client> Client;
+        void on_message(websocketpp::connection_hdl hdl, Client::message_ptr msg);
+        void pubListUpdatedCb(std::vector<std::string> _list);
+        void addConnection(std::string _uri);
 
-        void initClient();
-
-        Client client_;
+        std::map<std::string, Client *> connectionWithPubs_;
 
     private:
         std::vector<Callback> callbacks_;
         std::mutex cbListLock_;
+
+        std::string resourceName_;
     };
 
 }
