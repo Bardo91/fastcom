@@ -32,7 +32,7 @@ namespace fastcom{
 
         magicInitOfData();
         initServer();
-        cm.registerUri(ip_, port_, "/integer_count");
+        cm.registerUri(ip_, port_, _uri);
     }
 
     template<typename SerializableObject_>
@@ -73,9 +73,8 @@ namespace fastcom{
 
             try {
                 // Set logging settings
-                // internalServer_.set_access_channels(websocketpp::log::alevel::all);
-                // internalServer_.clear_access_channels(websocketpp::log::alevel::frame_payload);
                 internalServer_.set_access_channels(websocketpp::log::alevel::none);
+                internalServer_.set_error_channels(websocketpp::log::alevel::none);
 
                 // Initialize Asio
                 internalServer_.init_asio();
@@ -90,7 +89,7 @@ namespace fastcom{
                 internalServer_.start_accept();
 
                 // Start the ASIO io_service run loop
-                std::cout << "ready to listen in port " << port_ << std::endl;
+                // std::cout << "ready to listen in port " << port_ << std::endl;
                 internalServer_.run();
             } catch (websocketpp::exception const & e) {
                 std::cout << e.what() << std::endl;
@@ -106,7 +105,7 @@ namespace fastcom{
         lock.lock();
         subscribers_.insert(hdl);
         Server::connection_ptr con = internalServer_.get_con_from_hdl(hdl);
-        std::cout << con->get_resource() << std::endl;
+        // std::cout << con->get_resource() << std::endl;
         lock.unlock();
     }
 

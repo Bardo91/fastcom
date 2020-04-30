@@ -55,7 +55,8 @@ namespace fastcom{
             try {
                 server_ = new Server;
                 // Disable all loggings
-                server_->set_access_channels(websocketpp::log::alevel::all);
+                server_->set_access_channels(websocketpp::log::alevel::none);
+                server_->set_error_channels(websocketpp::log::alevel::none);
 
                 // Initialize Asio
                 server_->init_asio();
@@ -102,7 +103,9 @@ namespace fastcom{
 
     void Mole::onOpen(websocketpp::connection_hdl hdl) {
         serverGuard_.lock();
-        //publishersTable_[hdl.lock()] = {};
+        // Connection manager connected, send message back
+        websocketpp::lib::error_code ec;
+        server_->send(hdl, "connection_etablished@", websocketpp::frame::opcode::binary, ec);
         serverGuard_.unlock();
     }
 

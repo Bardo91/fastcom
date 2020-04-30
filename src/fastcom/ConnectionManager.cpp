@@ -66,7 +66,7 @@ namespace fastcom{
     ConnectionManager::ConnectionManager(){
         while(!connectToMole()){
             initMole();
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            //std::this_thread::sleep_for(std::chrono::seconds(2));
         }
         isConnected_ = true;
     }
@@ -82,6 +82,7 @@ namespace fastcom{
             size_t runResult = 0;
             try {
                 connectionWithMole_->set_access_channels(websocketpp::log::alevel::none);
+                connectionWithMole_->set_error_channels(websocketpp::log::alevel::none);
                 // Initialize ASIO
                 connectionWithMole_->init_asio();
 
@@ -97,7 +98,6 @@ namespace fastcom{
                 // this will cause a single connection to be made to the server. connectionWithMole_->run()
                 // will exit when this connection is closed.
                 connectionExist = true;
-                connectionCV_.notify_all();
                 runResult = connectionWithMole_->run();
             } catch (websocketpp::exception const & e) {
                 std::cout << e.what() << std::endl;
@@ -106,11 +106,12 @@ namespace fastcom{
             }
             // Exited for some reason
             connectionExist = false;
+            connectionCV_.notify_all();
             
         });
 
         connectionCV_.wait(lock);
-        std::this_thread::sleep_for(std::chrono::seconds(1)); // 666 better way to see if connected or not.
+        
         if(!connectionExist){
             connectionThread_.join();
         }
@@ -144,7 +145,9 @@ namespace fastcom{
         std::string cmd = rawMsg.substr(0, rawMsg.find_first_of("@"));
         rawMsg = rawMsg.substr(rawMsg.find_first_of("@")+1, rawMsg.size());
 
-        if(cmd == "new_publisher"){
+        if (cmd == "connection_etablished"){
+            connectionCV_.notify_all();
+        } else if(cmd == "new_publisher"){
             std::string publisherInfo = rawMsg.substr(0, rawMsg.find_first_of("/"));
             std::string stream = rawMsg.substr(rawMsg.find_first_of("/"), rawMsg.size());
             for(auto &subscriber : updateSubTable_[stream]){

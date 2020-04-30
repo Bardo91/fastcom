@@ -62,6 +62,7 @@ namespace fastcom{
                 Client *client = new Client;
                 connectionWithPubs_[_uri] = client; 
                 client->set_access_channels(websocketpp::log::alevel::none);
+                client->set_error_channels(websocketpp::log::alevel::none);
                 // Initialize ASIO
                 client->init_asio();
 
