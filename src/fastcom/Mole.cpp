@@ -102,13 +102,13 @@ namespace fastcom{
 
     void Mole::onOpen(websocketpp::connection_hdl hdl) {
         serverGuard_.lock();
-        //uriTable_[hdl.lock()] = {};
+        //publishersTable_[hdl.lock()] = {};
         serverGuard_.unlock();
     }
 
     void Mole::onClose(websocketpp::connection_hdl hdl) {
         serverGuard_.lock();
-        //uriTable_.erase(hdl.lock());
+        //publishersTable_.erase(hdl.lock());
         serverGuard_.unlock();
     }
 
@@ -146,7 +146,14 @@ namespace fastcom{
         serverGuard_.lock();
         std::string publisherInfo = _uri.substr(0, _uri.find_first_of("/"));
         std::string stream = _uri.substr(_uri.find_first_of("/"), _uri.size());
-        uriTable_[publisherInfo].push_back(stream);
+        publishersTable_[publisherInfo].push_back(stream);
+
+        if(subscriberNotificationTable_.find(stream) != subscriberNotificationTable_.end()){
+            for(auto &con:subscriberNotificationTable_[stream]){
+                websocketpp::lib::error_code ec;
+                server_->send(con, "new_publisher@"+_uri, websocketpp::frame::opcode::binary, ec);
+            }
+        }
         serverGuard_.unlock();
     }
 
@@ -154,8 +161,8 @@ namespace fastcom{
         serverGuard_.lock();
         std::string publisherInfo = _uri.substr(0, _uri.find_first_of("/"));
         std::string stream = _uri.substr(_uri.find_first_of("/"), _uri.size());
-        if(auto iter = std::find(uriTable_[publisherInfo].begin(), uriTable_[publisherInfo].end(), stream) != uriTable_[publisherInfo].end()){
-            // uriTable_[publisherInfo].erase(iter); 666 TODO
+        if(auto iter = std::find(publishersTable_[publisherInfo].begin(), publishersTable_[publisherInfo].end(), stream) != publishersTable_[publisherInfo].end()){
+            // publishersTable_[publisherInfo].erase(iter); 666 TODO
         }
         serverGuard_.unlock();
     }
@@ -166,9 +173,14 @@ namespace fastcom{
 
     void Mole::sendListPublishers(Server::connection_ptr _con, std::string _uri){
         serverGuard_.lock();
+        
+        if(std::find(subscriberNotificationTable_[_uri].begin(), subscriberNotificationTable_[_uri].end(), _con) == subscriberNotificationTable_[_uri].end()){
+            subscriberNotificationTable_[_uri].push_back(_con);
+        }
+
         /// Need to store in uriTable also Ips and ports to be connected to.
         std::string listPublishers = "list@"+_uri+"|";
-        for(auto &[publisher, topics]: uriTable_){
+        for(auto &[publisher, topics]: publishersTable_){
             for(auto &topic: topics){
                 if(topic == _uri){
                     listPublishers += publisher + ",";

@@ -68,8 +68,10 @@ namespace fastcom{
         std::thread listenThread_;
         Server *server_;
 
+        std::unordered_map<std::string, std::vector<Server::connection_ptr>> subscriberNotificationTable_;
+
         // Map with connections and uris.
-        std::unordered_map<std::string, std::vector<std::string>> uriTable_;
+        std::unordered_map<std::string, std::vector<std::string>> publishersTable_;
         std::mutex serverGuard_;
         static bool isInit_;
     };

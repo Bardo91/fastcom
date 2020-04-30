@@ -144,16 +144,25 @@ namespace fastcom{
         std::string cmd = rawMsg.substr(0, rawMsg.find_first_of("@"));
         rawMsg = rawMsg.substr(rawMsg.find_first_of("@")+1, rawMsg.size());
 
-        // Now we only have one action, notify new uris.
-        std::string targetUri = rawMsg.substr(0, rawMsg.find_first_of("|"));
-        rawMsg = rawMsg.substr(rawMsg.find_first_of("|")+1, rawMsg.size());
-    
-        // Decode list of publishers.
-        std::vector<std::string> list = split(rawMsg, ',');
+        if(cmd == "new_publisher"){
+            std::string publisherInfo = rawMsg.substr(0, rawMsg.find_first_of("/"));
+            std::string stream = rawMsg.substr(rawMsg.find_first_of("/"), rawMsg.size());
+            for(auto &subscriber : updateSubTable_[stream]){
+                subscriber({publisherInfo});
+            }
+        }else if(cmd == "list"){
+            // Now we only have one action, notify new uris.
+            std::string targetUri = rawMsg.substr(0, rawMsg.find_first_of("|"));
+            rawMsg = rawMsg.substr(rawMsg.find_first_of("|")+1, rawMsg.size());
+        
+            // Decode list of publishers.
+            std::vector<std::string> list = split(rawMsg, ',');
 
-        // Update subscribers.
-        for(auto &subscriber : updateSubTable_[targetUri]){
-            subscriber(list);
+            // Update subscribers.
+            for(auto &subscriber : updateSubTable_[targetUri]){
+                subscriber(list);
+            }
+
         }
     }
 }

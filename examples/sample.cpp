@@ -38,6 +38,7 @@ int main(){
     fastcom::Publisher<std::string> p1("/integer_count");
     fastcom::Publisher<std::string> p2("/integer_count");
     fastcom::Subscriber<std::string> s1("/integer_count");
+    fastcom::Publisher<std::string> p3("/integer_count");
 
     s1.addCallback([&](const std::string &_msg){
         std::cout << _msg << std::endl;
@@ -47,6 +48,7 @@ int main(){
     while (true) {
         p1.publish("Hey! you are welcome! I am pub 1");
         p2.publish("Hey! you are welcome! I am pub 2");
+        p3.publish("Hey! you are welcome! I am pub 3");
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     

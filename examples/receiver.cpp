@@ -1,114 +1,51 @@
-/*
- * Copyright (c) 2016, Peter Thorson. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the WebSocket++ Project nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL PETER THORSON BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
+//---------------------------------------------------------------------------------------------------------------------
+//  FASTCOM
+//---------------------------------------------------------------------------------------------------------------------
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
+//---------------------------------------------------------------------------------------------------------------------
+//  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+//  and associated documentation files (the "Software"), to deal in the Software without restriction, 
+//  including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+//  sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in all copies or substantial 
+//  portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
+//  BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES 
+//  OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+//  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//---------------------------------------------------------------------------------------------------------------------
 
-#include <websocketpp/config/asio_no_tls_client.hpp>
-#include <websocketpp/client.hpp>
 
+#include <fastcom/Publisher.h>
+#include <fastcom/Subscriber.h>
+
+#include <fastcom/ConnectionManager.h>
+
+#include <string>
+#include <thread>
+#include <chrono>
 #include <iostream>
 
-typedef websocketpp::client<websocketpp::config::asio_client> client;
+int main(){
 
-using websocketpp::lib::placeholders::_1;
-using websocketpp::lib::placeholders::_2;
-using websocketpp::lib::bind;
-
-// pull out the type of messages sent by our config
-typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
-
-class Subscriber{
-public:
-    Subscriber(int _port){
-        this->magic(_port);
-    }
-
-private:
-    void on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
-        std::cout << "on_message called with hdl: " << hdl.lock().get()
-                << " and message: " << msg->get_payload()
-                << std::endl;
-
-
-        websocketpp::lib::error_code ec;
-
-        // c.send(hdl, msg->get_payload(), msg->get_opcode(), ec);
-
-        if (ec) {
-            std::cout << "Echo failed because: " << ec.message() << std::endl;
-        }
-    }
-
-    void magic(int _port){
-        std::string uri = "ws://localhost:"+std::to_string(_port)+"/integer_counter";
-
-        try {
-            // Set logging to be pretty verbose (everything except message payloads)
-            // c.set_access_channels(websocketpp::log::alevel::all);
-            // c.clear_access_channels(websocketpp::log::alevel::frame_payload);
-
-            c.set_access_channels(websocketpp::log::alevel::none);
-            // Initialize ASIO
-            c.init_asio();
-
-            // Register our message handler
-            c.set_message_handler(std::bind(&Subscriber::on_message,this,::_1,::_2));
-
-            websocketpp::lib::error_code ec;
-            client::connection_ptr con = c.get_connection(uri, ec);
-            if (ec) {
-                std::cout << "could not create connection because: " << ec.message() << std::endl;
-                return;
-            }
-
-            // Note that connect here only requests a connection. No network messages are
-            // exchanged until the event loop starts running in the next line.
-            c.connect(con);
-
-            // Start the ASIO io_service run loop
-            // this will cause a single connection to be made to the server. c.run()
-            // will exit when this connection is closed.
-            c.run();
-        } catch (websocketpp::exception const & e) {
-            std::cout << e.what() << std::endl;
-        }
-    }
-
-    client c;
-};
-
-// This message handler will be invoked once for each incoming message. It
-// prints the message and then sends a copy of the message back to the server.
-
-
-int main(int _argc, char* _argv[]) {
-    // Create a client endpoint
+    fastcom::Subscriber<std::string> s1("/integer_count");
+    fastcom::Subscriber<std::string> s2("/jojo");
     
-    Subscriber s(atoi(_argv[1]));
+    s1.addCallback([&](const std::string &_msg){
+        std::cout << _msg << std::endl;
+    });
 
-    std::this_thread::sleep_for(std::chrono::seconds(3));
 
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
     
+
 }
