@@ -33,6 +33,9 @@
 #include <chrono>
 #include <iostream>
 
+#include "SerializableVector.h"
+
+
 int main(){
 
     fastcom::Publisher<int> p1("/integer_count");
@@ -40,12 +43,19 @@ int main(){
 
     fastcom::Publisher<std::string> p3("/jojo");
 
+    fastcom::Publisher<SerializableVector<float>> p4("/custom");
 
+
+    SerializableVector<float> v;
+    v.push_back(1.123);
+    v.push_back(2.123);
+    v.push_back(3.123);
 
     while (true) {
         p1.publish(1);
         p2.publish("Hey jojo! you are welcome! I am pub 2");
         p2.publish("Hey jojo! you are welcome! I am pub 3");
+        p4.publish(v);
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     

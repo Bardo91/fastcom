@@ -33,10 +33,13 @@
 #include <chrono>
 #include <iostream>
 
+#include "SerializableVector.h"
+
 int main(){
 
     fastcom::Subscriber<int> s1("/integer_count");
     fastcom::Subscriber<std::string> s2("/jojo");
+    fastcom::Subscriber<SerializableVector<float>> s3("/custom");
     
     s1.addCallback([&](const int &_msg){
         std::cout << _msg << std::endl;
@@ -44,6 +47,11 @@ int main(){
 
     s2.addCallback([&](const std::string &_msg){
         std::cout << _msg << std::endl;
+    });
+
+    s3.addCallback([&](const SerializableVector<float> &_msg){
+        for(auto elem: _msg)
+            std::cout << elem << ", "<< std::endl;
     });
 
 
