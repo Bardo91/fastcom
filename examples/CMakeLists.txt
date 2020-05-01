@@ -25,6 +25,12 @@ target_link_libraries(example_sender LINK_PUBLIC fastcom)
 add_executable(example_receiver "receiver.cpp")
 target_link_libraries(example_receiver LINK_PUBLIC fastcom)
 
+add_executable(example_sender_image "sender_image.cpp")
+target_link_libraries(example_sender_image LINK_PUBLIC fastcom)
+
+add_executable(example_receiver_image "receiver_image.cpp")
+target_link_libraries(example_receiver_image LINK_PUBLIC fastcom)
+
 
 
 add_executable(sample "sample.cpp")
