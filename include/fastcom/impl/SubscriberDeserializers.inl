@@ -22,47 +22,20 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef FASTCOM_SUBSCRIBER_H_
-#define FASTCOM_SUBSCRIBER_H_
-
-#include <map>
-#include <mutex>
-#include <string>
-#include <vector>
-
-#include <functional>
-
-#include <websocketpp/config/asio_no_tls_client.hpp>
-#include <websocketpp/client.hpp>
-
 namespace fastcom{
+
+
     template<typename SerializableObject_>
-    class Subscriber{
-    public:
-        typedef std::function<void(const SerializableObject_)> Callback;
-        Subscriber(const std::string &_resourceName);
+    SerializableObject_ Subscriber<SerializableObject_>::deserializeData(std::string _data){
+        std::stringstream ss; ss << _data;
+        SerializableObject_ result;
+        ss >> result;
+        return result;
+    }
 
-        void addCallback(Callback _cb);
-    private:
-        SerializableObject_ deserializeData(std::string _data);
-
-        typedef websocketpp::client<websocketpp::config::asio_client> Client;
-        void on_message(websocketpp::connection_hdl hdl, Client::message_ptr msg);
-        void pubListUpdatedCb(std::vector<std::string> _list);
-        void addConnection(std::string _uri);
-
-        std::map<std::string, Client *> connectionWithPubs_;
-
-    private:
-        std::vector<Callback> callbacks_;
-        std::mutex cbListLock_;
-
-        std::string resourceName_;
-    };
+    template<>
+    std::string Subscriber<std::string>::deserializeData(std::string _data){
+        return _data;
+    }
 
 }
-
-#include <fastcom/Subscriber.inl>
-#include <fastcom/impl/SubscriberDeserializers.inl>
-
-#endif

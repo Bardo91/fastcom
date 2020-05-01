@@ -35,13 +35,13 @@
 
 int main(){
 
-    fastcom::Subscriber<std::string> s1("/integer_count");
+    fastcom::Subscriber<int> s1("/integer_count");
     fastcom::Subscriber<std::string> s2("/jojo");
     
-    s1.addCallback([&](const std::string &_msg){
+    s1.addCallback([&](const int &_msg){
         std::cout << _msg << std::endl;
     });
-    
+
     s2.addCallback([&](const std::string &_msg){
         std::cout << _msg << std::endl;
     });
