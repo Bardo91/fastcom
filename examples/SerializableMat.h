@@ -23,9 +23,12 @@ public:
         cv::imencode(".jpg", _v.imgRef_, buffer, _v.params_);
         std::string_view res((char*)buffer.data(), buffer.size());
         _out << res;
+        std::cout << "Serialized image of size " << buffer.size() << std::endl;
         return _out;
     }
     friend std::istream & operator>>(std::istream &_in, SerializableMat &_v) {
+
+        std::cout << "Deserializing image. ";
         std::vector<uint8_t> buffer;
         std::for_each(std::istreambuf_iterator<char>(_in),
                     std::istreambuf_iterator<char>(),
@@ -33,6 +36,8 @@ public:
                         buffer.push_back(c);
                     });
         
+        std::cout << "Final size: " << buffer.size() << std::endl;
+
         _v.imgRef_=cv::imdecode(buffer,1);
         return _in;
     }

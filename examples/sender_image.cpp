@@ -48,7 +48,7 @@ int main(){
         SerializableMat image(oriImg, 50);
         camera >> image;
         p1.publish(image);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     
 

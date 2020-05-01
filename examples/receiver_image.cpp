@@ -43,6 +43,7 @@ int main(){
     s1.addCallback([&](const SerializableMat &_msg){
         auto mat = _msg.getCvMat();
         cv::imshow("face", mat);
+        cv::waitKey(3);
     });
 
 
