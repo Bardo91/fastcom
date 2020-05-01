@@ -41,6 +41,10 @@ int main(){
     s1.addCallback([&](const std::string &_msg){
         std::cout << _msg << std::endl;
     });
+    
+    s2.addCallback([&](const std::string &_msg){
+        std::cout << _msg << std::endl;
+    });
 
 
     while (true) {

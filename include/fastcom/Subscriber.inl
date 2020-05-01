@@ -37,12 +37,19 @@ namespace fastcom{
 
     template<typename SerializableObject_>
     void Subscriber<SerializableObject_>::addCallback(Callback _cb){
-
+        callbacks_.push_back(_cb);
     }
 
     template<typename SerializableObject_>
     void Subscriber<SerializableObject_>::on_message(websocketpp::connection_hdl hdl, Client::message_ptr msg) {
-        std::cout << msg->get_payload() << std::endl;
+        // std::stringstream ss; ss << msg->get_payload();
+        SerializableObject_ data = msg->get_payload();
+        // ss >> data;
+
+        for(auto &cb: callbacks_){
+            cb(data);
+        }
+
     }
 
     template<typename SerializableObject_>
