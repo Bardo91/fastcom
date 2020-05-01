@@ -45,10 +45,10 @@ int main(){
 
     cv::Mat oriImg;
     while (true) {
-        SerializableMat image(oriImg, 50);
+        SerializableMat image(oriImg, 10);
         camera >> image;
         p1.publish(image);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     
 
