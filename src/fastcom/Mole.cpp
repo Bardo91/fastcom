@@ -57,9 +57,10 @@ namespace fastcom{
                 // Disable all loggings
                 server_->set_access_channels(websocketpp::log::alevel::none);
                 server_->set_error_channels(websocketpp::log::alevel::none);
-
+                
                 // Initialize Asio
                 server_->init_asio();
+                server_->set_reuse_addr(true); // To prevent "port already in use when unexpected closing of app"
 
                 // Register our message handler
                 server_->set_message_handler(std::bind(&Mole::onMessage, this, std::placeholders::_1,  std::placeholders::_2));
