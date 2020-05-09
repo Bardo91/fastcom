@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,28 +22,42 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
+
 #include <fastcom/Publisher.h>
+#include <fastcom/Subscriber.h>
 
+#include <fastcom/ConnectionManager.h>
+
+#include <string>
 #include <thread>
-#include <iostream>
 #include <chrono>
+#include <iostream>
 
-struct SimpleFloat{
-    float a;
-    float b;
-    float c;
-};
+#include "SerializableVector.h"
+
 
 int main(){
 
-    fastcom::Publisher<SimpleFloat> publisher(8888);
+    fastcom::Publisher<int> p1("/integer_count");
+    fastcom::Publisher<std::string> p2("/jojo");
 
-    SimpleFloat data;
-    data.a = 0;
-    for(;;){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));   
-        publisher.publish(data);
-        data.a +=1;
+    fastcom::Publisher<std::string> p3("/jojo");
+
+    fastcom::Publisher<SerializableVector<float>> p4("/custom");
+
+
+    SerializableVector<float> v;
+    v.push_back(1.123);
+    v.push_back(2.123);
+    v.push_back(3.123);
+
+    while (true) {
+        p1.publish(1);
+        p2.publish("Hey jojo! you are welcome! I am pub 2");
+        p2.publish("Hey jojo! you are welcome! I am pub 3");
+        p4.publish(v);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    
 
 }

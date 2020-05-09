@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,179 +22,72 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <iostream>
-
-#include <fastcom/macros.h>
+#include <fastcom/ConnectionManager.h>
 
 namespace fastcom{
-    //---------------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-    Subscriber<DataType_>::Subscriber(std::string _ip, int _port): mDeadlineTimout(io_service) {
-        mDeadlineTimout.expires_at(boost::posix_time::pos_infin);
-	
-        mEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(_ip), _port);
-        mSocket = new boost::asio::ip::udp::socket(io_service);
-        mSocket->open(boost::asio::ip::udp::v4());
 
-        checkDeadline();
+    template<typename SerializableObject_>
+    Subscriber<SerializableObject_>::Subscriber(const std::string &_resourceName){
+        resourceName_ = _resourceName;
+        auto &cm = fastcom::ConnectionManager::get();
 
-        // std::cout << "Trying to connect to " + std::to_string(_port) << std::endl;
-        mConnectionThread = std::thread([&](){
-            try {	
-				// for(;;){
-                    // Send query to publisher
-                    boost::array<char, 1> send_buf = { { 0 } };
-                    mSocket->send_to(boost::asio::buffer(send_buf), mEndpoint);
-                    
-                    // Set timeout
-                    // mDeadlineTimout.expires_from_now(boost::posix_time::milliseconds(200));
-
-                    // Wait for response
-                    // boost::system::error_code ec = boost::asio::error::would_block;
-                    // std::size_t length = 0;
-
-					// boost::array<char, 1> recv_buf;
-					// mSocket->async_receive_from( boost::asio::buffer(recv_buf), 
-                    //                                 mEndpoint, 
-                    //                                 boost::bind(
-                    //                                         &Subscriber<DataType_>::asyncConnectionHandle, this,
-                    //                                         boost::asio::placeholders::error,
-                    //                                         boost::asio::placeholders::bytes_transferred)
-                    //                                 );
-
-					// io_service.run_one();					
-                    // std::this_thread::sleep_for(std::chrono::milliseconds(300));
-                    
-                    // if(mReceivedConnectionNotification){
-                        mRun = true;
-                        mListenThread = std::thread(&Subscriber<DataType_>::listenCallback, this);  // 666 this will cause other problems...
-                    //     break;
-                    // }
-				// io_service.reset();
-			    // }
-		}catch (std::exception &e) {
-			std::cerr << e.what() << std::endl;
-		}
-		// std::cout << "Closing reading of new connections" << std::endl;
-        });
-
-
-        // std::this_thread::sleep_for(std::chrono::milliseconds(300));   // To make sure that the port is ready
+        cm.queryListPublishers(_resourceName, std::bind(&Subscriber<SerializableObject_>::pubListUpdatedCb, this, std::placeholders::_1));
         
-        mLastStamp = std::chrono::system_clock::now();
     }
 
-    //---------------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-    Subscriber<DataType_>::Subscriber(int _port): Subscriber("0.0.0.0", _port) {  }
-
-    //---------------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-    Subscriber<DataType_>::~Subscriber() {  
-	// Prevent publisher to keep working	
-	mRun = false;
-	// Unlock self socket
-	io_service.stop();
-	boost::system::error_code ec;
-	if(mSocket){
-		mSocket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-		mSocket->close();
-	}
-
-	// Join thread
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        if(mListenThread.joinable()){
-            mListenThread.join();
-        }   
-	if(mConnectionThread.joinable()){
-            mConnectionThread.join();
-        }        
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    template<typename SerializableObject_>
+    void Subscriber<SerializableObject_>::addCallback(Callback _cb){
+        callbacks_.push_back(_cb);
     }
 
-    //---------------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-    void Subscriber<DataType_>::attachCallback(std::function<void(DataType_ &)> _callback){
-        mCallbackGuard.lock();
-        mCallbacks.push_back(_callback);
-        mCallbackGuard.unlock();
-    }
+    template<typename SerializableObject_>
+    void Subscriber<SerializableObject_>::on_message(websocketpp::connection_hdl hdl, Client::message_ptr msg) {
+        // std::stringstream ss; ss << msg->get_payload();
+        SerializableObject_ data = deserializeData(msg->get_payload());
 
-    //---------------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-    void Subscriber<DataType_>::asyncConnectionHandle(const boost::system::error_code & error,  std::size_t length){
-        if(length == 1)
-        {
-            mReceivedConnectionNotification = true;
+        for(auto &cb: callbacks_){
+            cb(data);
         }
+
     }
 
-    //---------------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-    void Subscriber<DataType_>::checkDeadline() {
-        if (mDeadlineTimout.expires_at() <= boost::asio::deadline_timer::traits_type::now()) {
-            mSocket->cancel();
-            mDeadlineTimout.expires_at(boost::posix_time::pos_infin);
-        }
-        mDeadlineTimout.async_wait(boost::bind(&Subscriber<DataType_>::checkDeadline, this));
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-    void Subscriber<DataType_>::listenCallback(){
-        while(mRun){
-            try{
-                DataType_ packet;
-
-                bool result = false;
-                if constexpr(!is_vector<DataType_>::value && !is_string<DataType_>::value)
-                    result = listenCallback_impl_gen(packet);
-                else if constexpr(is_vector<DataType_>::value)
-                    result = listenCallback_impl_vec(packet);                
-                else if constexpr(is_string<DataType_>::value)
-                    result = listenCallback_impl_str(packet);
-
-                if(result){
-                    mLastStamp = std::chrono::system_clock::now();
-
-                    mCallbackGuard.lock();
-                    for(auto &callback: mCallbacks){
-                        callback(packet);
-                    }
-                    mCallbackGuard.unlock();
-                }
-            }catch(std::exception &e ){
-				std::cerr << e.what() << std::endl;
-                mRun = false;
+    template<typename SerializableObject_>
+    void Subscriber<SerializableObject_>::pubListUpdatedCb(std::vector<std::string> _list){
+        for(auto &pubUri: _list){
+            if(connectionWithPubs_.find(pubUri) == connectionWithPubs_.end()){
+                addConnection(pubUri);
             }
         }
     }
 
+    template<typename SerializableObject_>
+    void Subscriber<SerializableObject_>::addConnection(std::string _uri){
+        std::thread clientThread([&](std::string _uri){
+            std::string uri = "ws://"+_uri+resourceName_;
+            try {
+                Client *client = new Client;
+                connectionWithPubs_[_uri] = client; 
+                client->set_access_channels(websocketpp::log::alevel::none);
+                client->set_error_channels(websocketpp::log::alevel::none);
+                // Initialize ASIO
+                client->init_asio();
 
+                // Register our message handler
+                client->set_message_handler(std::bind(&Subscriber::on_message,this,std::placeholders::_1,std::placeholders::_2));
 
-    //---------------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-	template<typename T_, typename>
-    bool Subscriber<DataType_>::listenCallback_impl_gen(T_ &_packet){
-        boost::array<char, sizeof(DataType_)> recv_buf;
-        boost::asio::ip::udp::endpoint sender_endpoint;
+                websocketpp::lib::error_code ec;
+                Client::connection_ptr con = client->get_connection(uri, ec);
+                if (ec) {
+                    std::cout << "could not create connection because: " << ec.message() << std::endl;
+                    return;
+                }
 
-        size_t len = mSocket->receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
-        if(len == sizeof(DataType_)){
-            mLastStamp = std::chrono::system_clock::now();
-
-            DataType_ packet;
-            memcpy(&packet, &recv_buf[0], sizeof(DataType_));
-
-            _packet = packet;
-            return true;
-        }
-        return false;
+                client->connect(con);
+                client->run();
+            } catch (websocketpp::exception const & e) {
+                std::cout << e.what() << std::endl;
+            }
+        },_uri);
+        clientThread.detach();
     }
-
 }

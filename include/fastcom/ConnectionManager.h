@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,53 +22,54 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_SERVICESERVER_H_
-#define _FASTCOM_SERVICESERVER_H_
+#ifndef FASTCOM_CONNECTIONMANAGER_H_
+#define FASTCOM_CONNECTIONMANAGER_H_
 
-#include <boost/asio.hpp>
-#include<functional>
+#include <functional>
 #include <thread>
 
+#include <websocketpp/config/asio_no_tls_client.hpp>
+#include <websocketpp/client.hpp>
+
 namespace fastcom{
-    #define SERVICE_MESSAGE_TYPE \
-    public: \
-	bool checkType(size_t _hash){ \
-		return this->type() == _hash; \
-	} \
-	size_t type(){ \
-		return 0; \
-	}
 
-    /// Service Server class
-    template<typename RequestType_, typename ResponseType_>
-    class ServiceServer{
+    class ConnectionManager{
     public:
-        /// Basic constructor. Uses given port to accept connections
-        /// \param _port: port to accept connections
-        ServiceServer(int _port, std::function<void (RequestType_ &, ResponseType_ &)> _callback);
+        static ConnectionManager &get();
 
-        /// Basic destructor. Stop and disable the server.
-        ~ServiceServer();
+        void registerUri(const std::string &_ip, const uint16_t &_port, const std::string &_uri);
 
-    private:
-        size_t retreiveHashCode(boost::asio::ip::tcp::socket *_client);
-        
-        template<typename T_>
-        T_ receiveType(boost::asio::ip::tcp::socket *_client);
+        void unregisterUri(const std::string &_ip, const uint16_t &_port, const std::string &_uri);
+
+        void queryListPublishers(const std::string &_uri, std::function<void(std::vector<std::string>)> _responseCb);
 
     private:
-        int port_;
+        // singletone!
+        ConnectionManager();
+        static ConnectionManager *instance_;
+    
+    private:
+        // Connection with mole
+        typedef websocketpp::client<websocketpp::config::asio_client> Client;
+        Client *connectionWithMole_;
+        Client::connection_ptr *connectionHandler_;
+        std::thread connectionThread_;
 
-        boost::asio::io_service ioService_;
-        boost::asio::ip::tcp::acceptor serverSocket_;
+        std::mutex connectionGuard_;
+        std::condition_variable connectionCV_;
+        bool connectToMole();
+        bool initMole();
+        bool isConnectedToMole();
+        bool isConnected_ = false;
 
-        bool acceptingConnections_;
-        std::thread acceptingThread_;
+        void moleMessage(websocketpp::connection_hdl hdl, Client::message_ptr msg);
 
-        std::function<void (RequestType_ &, ResponseType_ &)> callback_;
+        std::map<std::string, std::vector<std::function<void(std::vector<std::string>)>>> updateSubTable_;
+
+    private:
+
     };
-}
 
-#include <fastcom/ServiceServer.inl>
+}
 
 #endif

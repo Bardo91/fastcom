@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,29 +22,42 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
+
+#include <fastcom/Publisher.h>
 #include <fastcom/Subscriber.h>
 
+#include <fastcom/ConnectionManager.h>
+
+#include <string>
 #include <thread>
-#include <iostream>
 #include <chrono>
+#include <iostream>
 
+#include "SerializableVector.h"
 
-struct SimpleFloat{
-    float a;
-    float b;
-    float c;
-};
+int main(){
 
-int main(int _argc, char **_argv){
-
-    fastcom::Subscriber<SimpleFloat> subscriber(_argv[1], 8888);
-
-    subscriber.attachCallback([&](SimpleFloat &_data){
-        std::cout << _data.a << std::endl;
+    fastcom::Subscriber<int> s1("/integer_count");
+    fastcom::Subscriber<std::string> s2("/jojo");
+    fastcom::Subscriber<SerializableVector<float>> s3("/custom");
+    
+    s1.addCallback([&](const int &_msg){
+        std::cout << _msg << std::endl;
     });
 
-    for(;;){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));   
+    s2.addCallback([&](const std::string &_msg){
+        std::cout << _msg << std::endl;
+    });
+
+    s3.addCallback([&](const SerializableVector<float> &_msg){
+        for(auto elem: _msg)
+            std::cout << elem << ", "<< std::endl;
+    });
+
+
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    
 
 }

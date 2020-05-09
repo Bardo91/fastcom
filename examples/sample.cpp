@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,44 +22,35 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
+
 #include <fastcom/Publisher.h>
 #include <fastcom/Subscriber.h>
 
-#include <thread>
-#include <iostream>
-#include <chrono>
+#include <fastcom/ConnectionManager.h>
 
-struct SimpleFloat{
-    float a;
-    float b;
-    float c;
-};
+#include <string>
+#include <thread>
+#include <chrono>
+#include <iostream>
 
 int main(){
 
-    fastcom::Publisher<SimpleFloat> *publisher;
-    fastcom::Subscriber<SimpleFloat> *subscriber;
+    fastcom::Publisher<std::string> p1("/integer_count");
+    fastcom::Publisher<std::string> p2("/integer_count");
+    fastcom::Subscriber<std::string> s1("/integer_count");
+    fastcom::Publisher<std::string> p3("/integer_count");
 
-    for(unsigned iter = 0; iter < 10; iter++){
-		publisher = new fastcom::Publisher<SimpleFloat>(8888);
-		subscriber = new fastcom::Subscriber<SimpleFloat>("127.0.0.1", 8888);
+    s1.addCallback([&](const std::string &_msg){
+        std::cout << _msg << std::endl;
+    });
 
-	    subscriber->attachCallback([&](SimpleFloat &_data){
-			std::cout << _data.a << std::endl;
-	    });
 
-		
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));   
-	    SimpleFloat data;
-	    data.a = 0;
-	    for(int i = 1;i<10;i++){
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));   
-			publisher->publish(data);
-			data.a +=1;
-	    }
-
-	    delete publisher;
-	    delete subscriber;
-	    std::cout << "start again" << std::endl;
+    while (true) {
+        p1.publish("Hey! you are welcome! I am pub 1");
+        p2.publish("Hey! you are welcome! I am pub 2");
+        p3.publish("Hey! you are welcome! I am pub 3");
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    
+
 }

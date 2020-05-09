@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,126 +22,99 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <iostream>
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
+#include <fastcom/ConnectionManager.h>
 
+namespace fastcom{
+    template<typename SerializableObject_>
+    Publisher<SerializableObject_>::Publisher(const std::string &_uri){
+        uri_ = _uri;
+        auto &cm = fastcom::ConnectionManager::get();
 
-namespace fastcom {
-    template<typename DataType_>
-    Publisher<DataType_>::Publisher(int _port){
-        mPort = _port;
-        mRun = true;
-        // std::cout << "Creating UDP server in port " std::to_string(mPort) << "... ";
-        mListenThread = std::thread([&]() {
-            try {
-                boost::asio::io_service io_service;
-                mServerSocket = new boost::asio::ip::udp::socket(io_service, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), mPort));
+        magicInitOfData();
+        initServer();
+        cm.registerUri(ip_, port_, _uri);
+    }
 
-                std::cout << "awaiting for connetions." << std::endl;
-		while (mRun) {
-			boost::array<char, 1> recv_buf;
-			boost::asio::ip::udp::endpoint *remote_endpoint = new boost::asio::ip::udp::endpoint();
-			boost::system::error_code error;
-			mServerSocket->receive_from(boost::asio::buffer(recv_buf), *remote_endpoint, 0, error);
+    template<typename SerializableObject_>
+    void Publisher<SerializableObject_>::publish(SerializableObject_ _msg){
+        websocketpp::lib::error_code ec;
+        std::stringstream ss; ss << _msg;
+        std::string serializedMsg = ss.str();
+        
+        lock.lock();
+        for(auto con:subscribers_){
+            internalServer_.send(con, serializedMsg, websocketpp::frame::opcode::binary, ec);
+        }
+        lock.unlock();
+    }
 
-			if (error && error != boost::asio::error::message_size) {
-				for (auto it = mUdpConnections.begin(); it != mUdpConnections.end();) {
-					if (*(*it) == *remote_endpoint) {
-						// std::cout << "Connection from " << remote_endpoint->address() << " has droped" << std::endl;
-						mSafeGuard.lock();
-						it = mUdpConnections.erase(it);
-						mSafeGuard.unlock();
-					}else{
-						it++;
-					}
-				}
-			}
-			else {
-				// Send confirmation
-				// boost::array<char, 1> send_buf = { { 0 } };
-				// mServerSocket->send_to(boost::asio::buffer(send_buf), *remote_endpoint);
-				
-				// std::cout << "Received new connection from " << remote_endpoint->address().to_string() << std::endl;
-				mSafeGuard.lock();
-				bool addCon = true;
-				for(auto &con : mUdpConnections){
-					if(*con == *remote_endpoint)
-						addCon = false;
-				}
-				if(addCon)
-					mUdpConnections.push_back(remote_endpoint);
-				mSafeGuard.unlock();
-			}
-		}
-		io_service.stop();
-		boost::system::error_code ec;
-		mServerSocket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-		mServerSocket->close();
-            }
-            catch (std::exception &e) {
-                std::cerr << e.what() << std::endl;
-            }
-        });
-    }  
+    template<typename SerializableObject_>
+    void Publisher<SerializableObject_>::magicInitOfData(){
+        try {
+            boost::asio::io_service netService;
+            boost::asio::ip::udp::resolver   resolver(netService);
+            boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), "google.com", "");
+            boost::asio::ip::udp::resolver::iterator endpoints = resolver.resolve(query);
+            boost::asio::ip::udp::endpoint ep = *endpoints;
+            boost::asio::ip::udp::socket socket(netService);
+            socket.connect(ep);
+            boost::asio::ip::address addr = socket.local_endpoint().address();
+            ip_ = addr.to_string();
+            port_ = socket.local_endpoint().port();
+            socket.close(); // close socket! and reuse ip and port.
+        } catch (std::exception& e){
+            std::cerr << "Could not deal with socket. Exception: " << e.what() << std::endl;
 
-    template<typename DataType_>
-    Publisher<DataType_>::~Publisher(){
-		// Prevent publisher to keep working	
-		mRun = false;
-		// Unlock self socket
-		boost::array<char, 1> send_buf = { { 0 } };
-		auto selfEndpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), mPort);
-		
-		if(mServerSocket){
-			mServerSocket->send_to(boost::asio::buffer(send_buf), selfEndpoint);
-		}
-		
-		// Join thread
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        if(mListenThread.joinable()){
-            mListenThread.join();
         }
     }
-    //-----------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-    inline void Publisher<DataType_>::publish(const DataType_ &_data){
-		if constexpr(!is_vector<DataType_>::value && !is_string<DataType_>::value)
-			publish_impl_gen(_data);
-		else if constexpr(is_vector<DataType_>::value)
-			publish_impl_vec(_data);                
-		else if constexpr(is_string<DataType_>::value)
-			publish_impl_str(_data);
-		else
-			assert(false);
+
+    template<typename SerializableObject_>
+    void Publisher<SerializableObject_>::initServer(){
+        listenThread_ = std::thread([&]{
+
+            try {
+                // Set logging settings
+                internalServer_.set_access_channels(websocketpp::log::alevel::none);
+                internalServer_.set_error_channels(websocketpp::log::alevel::none);
+
+                // Initialize Asio
+                internalServer_.init_asio();
+
+                internalServer_.set_open_handler(std::bind(&Publisher::on_open, this, std::placeholders::_1));
+                internalServer_.set_close_handler(std::bind(&Publisher::on_close, this,std::placeholders::_1));
+
+                // Listen on port 9002
+                internalServer_.listen(port_);
+
+                // Start the server accept loop
+                internalServer_.start_accept();
+
+                // Start the ASIO io_service run loop
+                // std::cout << "ready to listen in port " << port_ << std::endl;
+                internalServer_.run();
+            } catch (websocketpp::exception const & e) {
+                std::cout << e.what() << std::endl;
+            } catch (...) {
+                std::cout << "other exception" << std::endl;
+            }
+        });
     }
 
-	//-----------------------------------------------------------------------------------------------------------------
-    template<typename DataType_>
-	template<typename T_, typename>
-    inline void Publisher<DataType_>::publish_impl_gen(const T_ &_data){
-    	if(mRun && mServerSocket){
-			mSafeGuard.lock();
-			for (auto &con : mUdpConnections) {
-				boost::system::error_code error;
-				boost::system::error_code ignored_error;
 
-				boost::array<char, sizeof(DataType_)> send_buffer;
-				memcpy(&send_buffer[0], &_data, sizeof(DataType_));
-				try {
-					mServerSocket->send_to(boost::asio::buffer(send_buffer), *con, 0, ignored_error);
-				}
-				catch (std::exception &e) {
-					std::cerr << e.what() << std::endl;
-				}
-			}
-			mSafeGuard.unlock();
-        }    
+    template<typename SerializableObject_>
+    void Publisher<SerializableObject_>::on_open(websocketpp::connection_hdl hdl) {
+        lock.lock();
+        subscribers_.insert(hdl);
+        Server::connection_ptr con = internalServer_.get_con_from_hdl(hdl);
+        // std::cout << con->get_resource() << std::endl;
+        lock.unlock();
     }
 
-	//-----------------------------------------------------------------------------------------------------------------
-	template<typename DataType_>
-	inline unsigned int Publisher<DataType_>::nConnections() {
-		return mUdpConnections.size();
-	}
-} 
+    template<typename SerializableObject_>
+    void Publisher<SerializableObject_>::on_close(websocketpp::connection_hdl hdl) {
+        lock.lock();
+        subscribers_.erase(hdl);
+        lock.unlock();
+    }
+
+}

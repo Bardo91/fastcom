@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,76 +22,47 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef _FASTCOM_SUBSCRIBER_H_
-#define _FASTCOM_SUBSCRIBER_H_
+#ifndef FASTCOM_SUBSCRIBER_H_
+#define FASTCOM_SUBSCRIBER_H_
 
-#include <boost/asio.hpp>
-#include <thread>
+#include <map>
 #include <mutex>
-#include <boost/asio/deadline_timer.hpp>
+#include <string>
+#include <vector>
 
-#include <fastcom/macros.h>
+#include <functional>
+
+#include <websocketpp/config/asio_no_tls_client.hpp>
+#include <websocketpp/client.hpp>
 
 namespace fastcom{
-    /// Class to subscribe to information. 
-    template<typename DataType_>
+    template<typename SerializableObject_>
     class Subscriber{
-        public:
-            /// Constructor that prepares the subsciption. 
-            /// \param _ip: ip where the publisher is located
-            /// \param _port: specific port in the IP to be binded
-            Subscriber(std::string _ip, int _port);
+    public:
+        typedef std::function<void(const SerializableObject_)> Callback;
+        Subscriber(const std::string &_resourceName);
 
-            /// Constructor that prepares the subsciption. This constructor assumes that the publisher is in the same computer.
-            /// \param _port: specific port in the IP to be binded
-            Subscriber(int _port);
+        void addCallback(Callback _cb);
+    private:
+        SerializableObject_ deserializeData(std::string _data);
 
-            /// Destructor
-            ~Subscriber();
+        typedef websocketpp::client<websocketpp::config::asio_client> Client;
+        void on_message(websocketpp::connection_hdl hdl, Client::message_ptr msg);
+        void pubListUpdatedCb(std::vector<std::string> _list);
+        void addConnection(std::string _uri);
 
-            /// Attach a callback to a subscription. Each time data arrives the attached callback are called
-            void attachCallback(std::function<void(DataType_ &)> _callback);
+        std::map<std::string, Client *> connectionWithPubs_;
 
-            bool isConnected() const { return mRun; };
+    private:
+        std::vector<Callback> callbacks_;
+        std::mutex cbListLock_;
 
-        private:
-            void asyncConnectionHandle(const boost::system::error_code &error, std::size_t length);
-            bool mReceivedConnectionNotification = false;
-            void checkDeadline();
-
-            void listenCallback();
-            
-            template<typename T_ = DataType_, typename = typename std::enable_if<!is_vector<DataType_>::value && !is_string<DataType_>::value, T_>::type>
-            bool listenCallback_impl_gen(T_ &_data);
-
-            template<typename T_ = DataType_, typename = typename std::enable_if<is_vector<DataType_>::value, T_>::type> 
-            bool listenCallback_impl_vec(T_ &_data);
-
-            template<typename T_ = DataType_, typename = typename std::enable_if<is_string<DataType_>::value, T_>::type>
-            bool listenCallback_impl_str(T_ &_data);
-            
-        private:
-            boost::asio::ip::udp::endpoint mEndpoint;
-            boost::asio::ip::udp::socket *mSocket;
-            boost::asio::io_service io_service;
-
-            std::mutex mCallbackGuard;
-            std::vector<std::function<void(DataType_ &)>> mCallbacks;
-
-            std::thread mListenThread;
-            std::thread mConnectionThread;
-            boost::asio::deadline_timer mDeadlineTimout;
-
-            std::chrono::system_clock::time_point mLastStamp;
-            bool mRun = false;
+        std::string resourceName_;
     };
+
 }
 
 #include <fastcom/Subscriber.inl>
-
-// Specializations
-#include <fastcom/impl/StringSubscriber.inl>
-#include <fastcom/impl/VectorSubscriber.inl>
-
+#include <fastcom/impl/SubscriberDeserializers.inl>
 
 #endif

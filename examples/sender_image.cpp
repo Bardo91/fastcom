@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------------------------------------------------
 //  FASTCOM
 //---------------------------------------------------------------------------------------------------------------------
-//  Copyright 2019 - Pablo Ramon Soria (a.k.a. Bardo91) 
+//  Copyright 2020 -    Manuel Perez Jimenez (a.k.a. manuoso)
+//                      Marco A. Montes Grova (a.k.a. mgrova) 
+//                      Pablo Ramon Soria (a.k.a. Bardo91)
+//                      Ricardo Lopez Lopez (a.k.a. ric92)
 //---------------------------------------------------------------------------------------------------------------------
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 //  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -19,35 +22,34 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
-#include <fastcom/ImagePublisher.h>
 
+#include <fastcom/Publisher.h>
+#include <fastcom/Subscriber.h>
+
+#include <fastcom/ConnectionManager.h>
+
+#include <string>
 #include <thread>
-#include <iostream>
 #include <chrono>
+#include <iostream>
 
-#ifdef FASTCOM_HAS_OPENCV
+#include "SerializableMat.h"
+#include <opencv2/opencv.hpp>
 
-struct SimpleFloat{
-    float a;
-};
 
-int main(int _argc, char** _argv){
+int main(){
 
-    fastcom::ImagePublisher publisher(8888);
-
+    fastcom::Publisher<SerializableMat> p1("/beauty_face");
+    
     cv::VideoCapture camera(0);
 
-    for(;;){
-        cv::Mat image;
+    cv::Mat oriImg;
+    while (true) {
+        SerializableMat image(oriImg, 10);
         camera >> image;
-        publisher.publish(image, 30);
+        p1.publish(image);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
+    
 
 }
-
-#else
-
-int main() {
-
-}
-#endif

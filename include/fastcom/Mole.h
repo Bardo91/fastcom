@@ -22,34 +22,60 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //---------------------------------------------------------------------------------------------------------------------
 
+#ifndef FASTCOM_MOLE_H_
+#define FASTCOM_MOLE_H_
 
-#include <fastcom/Publisher.h>
-#include <fastcom/Subscriber.h>
-
-#include <fastcom/ConnectionManager.h>
-
+#include <unordered_map>
+#include <mutex>
 #include <string>
 #include <thread>
-#include <chrono>
-#include <iostream>
-
-#include "SerializableMat.h"
-#include <opencv2/opencv.hpp>
-
-int main(){
-
-    fastcom::Subscriber<SerializableMat> s1("/beauty_face");
-
-    s1.addCallback([&](const SerializableMat &_msg){
-        auto mat = _msg.getCvMat();
-        cv::imshow("face", mat);
-        cv::waitKey(3);
-    });
+#include <vector>
 
 
-    while (true) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    
+#include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/server.hpp>
+
+namespace fastcom{
+
+    class Mole{
+    public:
+        typedef websocketpp::server<websocketpp::config::asio> Server;
+
+        static uint16_t port();
+
+        static bool init();
+
+    private:
+        Mole();
+        ~Mole();
+        static Mole *instance_;
+
+        void onMessage(websocketpp::connection_hdl hdl, Server::message_ptr msg);
+        void onOpen(websocketpp::connection_hdl hdl);
+        void onClose(websocketpp::connection_hdl hdl);
+
+        enum class MessageType {Unknown, RegisterUri, UnregisterUri, CloseMole, QueryPublishers};
+        MessageType decodeAction(const std::string &_uri);
+        void doAction(Server::connection_ptr hdl, MessageType _type, std::string _data);
+
+        void registerUri(std::string _uri);
+        void unregisterUri(std::string _uri);
+        void closeMole();
+        void sendListPublishers(Server::connection_ptr _con, std::string _uri);
+
+    private: // Comm related membersXD
+        static const uint16_t port_ = 22322;
+        std::thread listenThread_;
+        Server *server_;
+
+        std::unordered_map<std::string, std::vector<Server::connection_ptr>> subscriberNotificationTable_;
+
+        // Map with connections and uris.
+        std::unordered_map<std::string, std::vector<std::string>> publishersTable_;
+        std::mutex serverGuard_;
+        static bool isInit_;
+    };
 
 }
+
+#endif
