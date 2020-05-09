@@ -77,7 +77,13 @@ namespace fastcom{
         std::unique_lock<std::mutex> lock(connectionGuard_);
 
         connectionThread_ = std::thread([&]{
-            std::string uri = "ws://localhost:"+std::to_string(Mole::port());
+            std::string hostIP;
+            if(getenv("FASTCOM_MOLE_IP"))
+                hostIP = getenv("FASTCOM_MOLE_IP"); // In the future look for it in the net.
+            else 
+                hostIP = "localhost";
+                
+            std::string uri = "ws://"+hostIP+":"+std::to_string(Mole::port());
             connectionWithMole_ = new Client;
             size_t runResult = 0;
             try {
