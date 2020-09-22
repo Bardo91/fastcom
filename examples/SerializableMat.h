@@ -10,7 +10,7 @@ class SerializableMat{
 public:
     SerializableMat(cv::Mat _img = cv::Mat(), int _jpegQuality = 50){
         imgRef_ = _img;
-        params_.push_back(CV_IMWRITE_JPEG_QUALITY);
+        params_.push_back(cv::IMWRITE_JPEG_QUALITY);
         params_.push_back(_jpegQuality);
     }
 
