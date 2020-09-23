@@ -44,7 +44,7 @@ namespace fastcom{
 
         void addCallback(Callback _cb);
     private:
-        SerializableObject_ deserializeData(std::string _data);
+        void deserializeData(const std::string &_data, SerializableObject_ &_out);
 
         typedef websocketpp::client<websocketpp::config::asio_client> Client;
         void on_message(websocketpp::connection_hdl hdl, Client::message_ptr msg);

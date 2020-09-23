@@ -43,7 +43,8 @@ namespace fastcom{
     template<typename SerializableObject_>
     void Subscriber<SerializableObject_>::on_message(websocketpp::connection_hdl hdl, Client::message_ptr msg) {
         // std::stringstream ss; ss << msg->get_payload();
-        SerializableObject_ data = deserializeData(msg->get_payload());
+        SerializableObject_ data;
+        deserializeData(msg->get_payload(), data);
 
         for(auto &cb: callbacks_){
             cb(data);

@@ -26,16 +26,14 @@ namespace fastcom{
 
 
     template<typename SerializableObject_>
-    SerializableObject_ Subscriber<SerializableObject_>::deserializeData(std::string _data){
+    void Subscriber<SerializableObject_>::deserializeData(const std::string &_data, SerializableObject_ &_out){
         std::stringstream ss; ss << _data;
-        SerializableObject_ result;
-        ss >> result;
-        return result;
+        ss >> _out;
     }
 
     template<>
-    std::string Subscriber<std::string>::deserializeData(std::string _data){
-        return _data;
+    void Subscriber<std::string>::deserializeData(const std::string &_data, std::string &_out){
+        _out = _data;
     }
 
 }
