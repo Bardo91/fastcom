@@ -37,7 +37,7 @@
 
 int main(){
 
-    fastcom::Subscriber<int> s1("/integer_count");
+    fastcom::Subscriber<float> s1("/pepe");
     fastcom::Subscriber<std::string> s2("/jojo");
     fastcom::Subscriber<SerializableVector<float>> s3("/custom");
     
