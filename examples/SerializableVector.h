@@ -28,6 +28,7 @@ public:
         }
 
         delete[] buffer;
+        return  _in;
     }
 
     void resize(unsigned int _s) { v_.resize(_s);};

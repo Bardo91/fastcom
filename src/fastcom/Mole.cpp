@@ -42,8 +42,10 @@ namespace fastcom{
             std::this_thread::sleep_for(std::chrono::seconds(1));
             if(!isInit_){
                 delete instance_;
+                return false;
             }
         }
+        return true;
     }
 
     Mole::~Mole(){

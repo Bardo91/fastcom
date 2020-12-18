@@ -33,6 +33,7 @@ if(UNIX)
 	add_definitions(-std=c++11 -pthread -lpthread)
 elseif(WIN32)
 	set(Boost_USE_STATIC_LIBS ON)
+	add_compile_options("/std:c++latest")
 endif()
 
 
@@ -66,7 +67,7 @@ elseif(WIN32)
 	target_compile_options(${PROJECT_NAME} PUBLIC "/EHsc")
 endif()
 
-find_package(Boost REQUIRED COMPONENTS system thread regex)
+find_package(Boost REQUIRED COMPONENTS system thread regex random)
 target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${Boost_LIBRARIES})
 

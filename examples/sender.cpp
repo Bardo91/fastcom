@@ -38,7 +38,7 @@
 
 int main(){
 
-    fastcom::Publisher<int> p1("/integer_count");
+    fastcom::Publisher<float> p1("/pepe");
     fastcom::Publisher<std::string> p2("/jojo");
 
     fastcom::Publisher<std::string> p3("/jojo");
@@ -52,7 +52,7 @@ int main(){
     v.push_back(3.123);
 
     while (true) {
-        p1.publish(1);
+        p1.publish(1.0);
         p2.publish("Hey jojo! you are welcome! I am pub 2");
         p2.publish("Hey jojo! you are welcome! I am pub 3");
         p4.publish(v);
