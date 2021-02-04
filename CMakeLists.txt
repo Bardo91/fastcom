@@ -67,7 +67,7 @@ elseif(WIN32)
 	target_compile_options(${PROJECT_NAME} PUBLIC "/EHsc")
 endif()
 
-find_package(Boost REQUIRED COMPONENTS system thread regex random)
+find_package(Boost REQUIRED COMPONENTS system)
 target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${Boost_LIBRARIES})
 
@@ -79,8 +79,8 @@ if(OpenCV_FOUND)
 endif(OpenCV_FOUND)
 
 
-find_package(websocketpp REQUIRED)
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC websocketpp::websocketpp)
+#find_package(websocketpp REQUIRED)
+#target_link_libraries(${PROJECT_NAME} LINK_PUBLIC websocketpp::websocketpp)
 
 
 if(WIN32)

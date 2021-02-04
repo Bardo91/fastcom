@@ -3,7 +3,7 @@ include(CMakeFindDependencyMacro)
 
 find_package(OpenCV)
 
-find_package(websocketpp REQUIRED)
+#find_package(websocketpp REQUIRED)
 
 if(NOT TARGET fastcom::fastcom)
     include("${fastcom_CMAKE_DIR}/fastcomTargets.cmake")
